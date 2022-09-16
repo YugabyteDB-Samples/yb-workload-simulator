@@ -1,0 +1,132 @@
+/* You can add global styles to this file, and also import other style files */
+@charset "UTF-8";
+
+body {
+	background-color: black;
+	color: white;
+	box-sizing: border-box;
+}
+
+.outer {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+}
+
+.graph .title {
+	box-sizing: border-box;
+	font-size: x-large;
+	text-align: center;
+	background-color: #222;
+	font-weight: bold;
+	height: 48px;
+	padding-top: 10px;
+}
+
+.title .status {
+	float: right;
+	margin-right: 2em;
+	font-size: small;
+	border-color: white;
+	border-radius: 0.5em;
+	padding: 0.3em 1em;
+}
+
+.title .status.ONLINE {
+	background-color: darkgreen;
+}
+
+.title .status.OFFLINE {
+	background-color: darkred;
+}
+
+.title .status.DEGRADED {
+	background-color: darkorange;
+}
+
+.graphBody {
+	height: calc(100% - 48px);
+}
+
+.chartTile {
+	fill: white;
+	stroke: white;
+}
+
+.xLabel {
+	fill: white;
+}
+
+.data.line {
+	stroke: yellow;
+	fill: none;
+	stroke-width: 3;
+}
+
+.data.lineMax {
+	stroke: red;
+	fill: none;
+	stroke-width: 2;
+}
+
+.data.lineMin {
+	stroke: lightblue;
+	fill: none;
+	stroke-width: 2;
+}
+
+
+.area {
+	stroke: none;
+	fill: #8e8e2f35;
+}
+
+.tick line {
+	stroke: #FFF;
+	opacity: 25%;
+}
+
+.toggleFullScreen {
+	position: absolute;
+	top: 10px;
+	left: 10px;
+	z-index: 100;
+	height: 20px;
+	width: 20px;
+}
+
+.overlay {
+	fill: none;
+	pointer-events: all;
+}
+
+.focus circle {
+	fill: steelblue;
+}
+
+.focus text {
+	font-size: 14px;
+}
+
+.tooltip {
+	fill: white;
+	stroke: #000;
+}
+
+.tooltip-date, .tooltip-likes {
+	font-weight: bold;
+}
+
+/* DEFINITIONS FOR NEW VERSION */
+figure {
+	margin-block-start: 0;
+	margin-block-end: 0;
+	margin-inline-start: 0;
+	margin-inline-end: 0;
+}
+
+.p-panel .p-panel-header {
+	background-color: rgb(24, 24, 168) !important;
+}

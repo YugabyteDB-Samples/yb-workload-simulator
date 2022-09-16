@@ -1,0 +1,14 @@
+*/target/**
+.DS_Store
+.classpath
+.metadata
+.project
+.settings
+bin
+target
+*.tgz
+*.zip
+*.out
+*.jar
+*.iml
+.idea/

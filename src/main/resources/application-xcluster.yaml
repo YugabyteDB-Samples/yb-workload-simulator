@@ -1,0 +1,27 @@
+# use this profile for running the app on xcluster. Put in new IPs, when they are ready.
+spring:
+  jpa:
+    open-in-view: false
+  flyway:
+    enabled: false
+  datasource:
+    hikari:
+      username: yugabyte
+      password: yugabyte
+      maximumPoolSize: 100
+      maxLifeTime: 3600000
+      data-source-class-name: com.yugabyte.ysql.YBClusterAwareDataSource
+      data-source-properties:
+        serverName: 172.151.63.164
+        portNumber: 5433
+        databaseName: yugabyte
+        additionalEndpoints: 172.151.29.131:5433,172.151.44.107:5433,172.151.63.164:5433
+        topologyKeys: "aws.us-west-2.us-west-2a,aws.us-west-2.us-west-2b,aws.us-west-2.us-west-2c"
+
+
+logging.level:
+  java.sql: DEBUG
+  com.zaxxer.hikari: TRACE
+  com.yugabyte: ERROR
+  org.hibernate.SQL: DEBUG
+  org.hibernate.type.descriptor.sql.BasicBinder: TRACE

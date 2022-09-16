@@ -1,0 +1,9 @@
+figure {
+    /* width: calc(49% - 20px); */
+    width: calc(50% - 2px);
+    height: 32%;
+    margin: 10px;
+    display: inline-block;
+    box-sizing: border-box;
+    margin: 0;
+}

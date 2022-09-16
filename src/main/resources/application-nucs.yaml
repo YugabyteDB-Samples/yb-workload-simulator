@@ -1,0 +1,32 @@
+spring:
+  workload: ${workload:simpleSelectWorkload}
+  jpa:
+    open-in-view: false
+  flyway:
+    enabled: false
+  datasource:
+    hikari:
+      username: yugabyte
+      password: 
+      connection-init-sql: 'set yb_read_from_followers to true;'
+      maximumPoolSize: 100
+      maxLifeTime: 3000000
+      data-source-class-name: com.yugabyte.ysql.YBClusterAwareDataSource
+      data-source-properties:
+        serverName: 192.168.86.235
+        portNumber: 5433
+        #loadBalance: "true"
+        databaseName: yugabyte
+        additionalEndpoints: 192.168.86.231:5433,192.168.86.237:5433
+        topologyKeys: Denver.az2
+#        ssl: ${ssl:false}
+#        sslmode: ${sslmode:disable}
+#        sslrootcert: ${sslrootcert:~/.ssh/ybcloudcert/root.crt}
+
+
+logging.level:
+  java.sql: DEBUG
+  com.zaxxer.hikari: TRACE
+  com.yugabyte: ERROR
+  org.hibernate.SQL: DEBUG
+  org.hibernate.type.descriptor.sql.BasicBinder: TRACE

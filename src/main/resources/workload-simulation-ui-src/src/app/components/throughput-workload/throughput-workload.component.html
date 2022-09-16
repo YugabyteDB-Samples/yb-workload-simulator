@@ -1,0 +1,20 @@
+<!--
+<ng-template pTemplate="icons">
+    <button pButton class="p-panel-header-icon p-link" (click)="menu.toggle($event)">
+        <span class="pi pi-cog"></span>
+    </button>
+    <p-menu #menu id="config_menu" [model]="items" [popup]="true"></p-menu>
+</ng-template>
+-->
+<div class="grid">
+    <div class="col" style="height: 300px;">
+        <div style = "width: 100%; height: 100%; background-color: black;">
+            <app-statistics-graph style="width: 100%" [idName]="workloadId" [timingData]="data.results" [duration]="duration" [timingType]="'LATENCY'" [timingMetric]="'WORKLOAD1'" [timingMetricName]="''"></app-statistics-graph> 
+        </div>
+    </div>
+    <div class="col" style="height: 300px;">
+        <div style = "width: 100%; height: 100%; background-color: black;">
+            <app-statistics-graph [idName]="workloadId + 'THROUGHPUT'" [timingData]="data.results" [duration]="duration" [timingType]="'THROUGHPUT'" [timingMetric]="'WORKLOAD1'" [timingMetricName]="''"></app-statistics-graph>
+        </div>
+    </div>
+</div>
