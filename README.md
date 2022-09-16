@@ -3,7 +3,7 @@ This is our base app containing some generic workloads. You can create/drop tabl
 
 ## Code setup and Installation
 
-###How to build the jar file
+### How to build the jar file
 Go to the root of the project and run:
 ```
 mvn clean package -DskipTests
