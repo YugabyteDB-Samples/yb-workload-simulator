@@ -54,3 +54,5 @@ java -DXmx=16g -Dmax-pool-size=10 -Dnode=<database-ip-or-name> -Ddbuser=<db-user
 ```
 http://<HOSTNAME>:8080
 ```
+![Screenshot](docs/image1.png)
+![Screenshot](docs/image2.png)
