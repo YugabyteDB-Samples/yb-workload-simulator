@@ -39,4 +39,10 @@ logging.level:
     
 server:
   port: 8080
-  
+
+ybm:
+  account-id: ${ybm-account-id:NA}
+  api-key: ${ybm-api-key:NA}
+  project-id: ${ybm-project-id:NA}
+  cluster-id: ${ybm-cluster-id:NA}
+  baseuri: ${ybm-baseuri:https://cloud.yugabyte.com/api/public/v1/accounts}
