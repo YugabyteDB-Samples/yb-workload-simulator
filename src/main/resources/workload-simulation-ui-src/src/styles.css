@@ -130,3 +130,11 @@ figure {
 .p-panel .p-panel-header {
 	background-color: rgb(24, 24, 168) !important;
 }
+
+.server {
+    fill: black;
+}
+
+.server.selected {
+    fill: blue;
+}

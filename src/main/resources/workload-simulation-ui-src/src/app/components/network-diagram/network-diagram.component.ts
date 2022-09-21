@@ -36,8 +36,12 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
   private height = 0;
   private simulation : any;
   private colorMap : any;
-  private currentNodes : NetworkNode[] = [];
+  private currentNodes  : NetworkNode[] = []; 
   private timer : any;
+
+  private d3link : any = d3;
+
+  private selectedItems : NetworkNode[] = []; // A set of the selected items with the id as the key
 
   graphNodes: NetworkNode[] = [];
   graphLinks: NetworkLink[] = [];
@@ -54,6 +58,7 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
   }
 
   ngOnInit(): void {
+    console.log(this.d3link);
   }
 
   ngAfterViewInit(){
@@ -83,7 +88,6 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
       .append("svg")
       .attr("width", "100%")
       .attr("height", "100%")
-      //.attr("viewBox", '0 0 300 400')
       .attr("viewBox", "0 0 " + this.width + " " + this.height)
       .attr("preserveAspectRatio", 'xMinYMin');
 
@@ -153,6 +157,142 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
     }
   }
 
+  private getNetworkNodeById(id : string) : NetworkNode | null {
+    for (let i = 0; i < this.graphNodes.length; i++) {
+      if (this.graphNodes[i].id === id) {
+        return this.graphNodes[i];
+      }
+    }
+    return null;
+  }
+
+
+  private selectedNodesChanged() {
+    console.log("Selection Changed", this.selectedItems);
+  }
+
+  private getServerChildrenOrSelf(node : NetworkNode) : NetworkNode[] {
+    if (node.type === NodeType.NODE) {
+      return [node];
+    }
+    else {
+      let results : NetworkNode[] = [];
+      for (let i = 0; i < this.graphLinks.length; i++) {
+        if (this.graphLinks[i].source === node.id) {
+          let thisChild = this.getNetworkNodeById(this.graphLinks[i].target);
+          if (thisChild) {
+            results = results.concat(this.getServerChildrenOrSelf(thisChild));
+          }
+        }
+      }
+      return results;
+    }
+  }
+
+  private isNodeSelected( node : NetworkNode ) {
+    for (let i = 0; i < this.selectedItems.length; i++) {
+      if (this.selectedItems[i].id === node.id) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // Determine if the item is already selected. If the item is a node, this is obvious,
+  // but if the item is a zone or region, it's only considered selected if all children are selected.
+  private isSelected(target: any ) : boolean {
+    let targetData : NetworkNode = d3.select(target).data()[0] as NetworkNode;
+    let allChildren = this.getServerChildrenOrSelf(targetData);
+    for (let i = 0; i < allChildren.length; i++) {
+      if (!this.isNodeSelected(allChildren[i])) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private setSelected(target: any) {
+    if (!this.isSelected(target)) {
+      let targetData : NetworkNode = d3.select(target).data()[0] as NetworkNode;
+      let nodes = this.getServerChildrenOrSelf(targetData);
+      for (let i = 0; i < nodes.length; i++) {
+        if (!this.isNodeSelected(nodes[i])) {
+          d3.selectAll('.server').filter(d => (d as NetworkNode).id == nodes[i].id).classed("selected", true);
+          this.selectedItems.push(nodes[i]);
+        }
+      }
+      this.selectedNodesChanged();
+    }
+  }
+
+  private setDeselected(target: any) {
+    let targetData : NetworkNode = d3.select(target).data()[0] as NetworkNode;
+    let nodes = this.getServerChildrenOrSelf(targetData);
+    for (let i = nodes.length-1; i>= 0; i--) {
+      d3.selectAll('.server').filter(d => (d as NetworkNode).id == nodes[i].id).classed("selected", false);
+      this.selectedItems.splice(i, 1);
+    }
+    this.selectedNodesChanged();
+  }
+
+  private toggleSelection(target:any) {
+    if (this.isSelected(target)) {
+      this.setDeselected(target);
+    }
+    else {
+      this.setSelected(target);
+    }
+  }
+
+  private deselectAll() {
+    d3.selectAll(".server").classed("selected", false);
+    this.selectedItems = [];   
+    this.selectedNodesChanged();
+  }
+
+  private click(d : PointerEvent) {
+    let target : any = d.currentTarget;
+    let shiftKey = d.shiftKey;
+    if (shiftKey) {
+      this.toggleSelection(target);
+    }
+    else {
+      this.deselectAll();
+      this.setSelected(target);
+    }
+  }
+
+  formComputerImage() : any {
+    let yOffset = -40;
+    let width = 80;
+    let height = 26;
+    let cornerRadius = 8;
+    let path = d3.path();
+    path.moveTo(-width/2, yOffset+cornerRadius);
+    path.arc(-width/2+cornerRadius, yOffset+cornerRadius, cornerRadius, Math.PI, Math.PI*3/2, false);
+    path.lineTo(width/2-cornerRadius, yOffset);
+    path.arc(width/2-cornerRadius, yOffset+cornerRadius, cornerRadius, Math.PI * 3/2, Math.PI * 2, false);
+    path.lineTo(width/2, yOffset + height - cornerRadius);
+    path.arc(width/2-cornerRadius, yOffset + height-cornerRadius, cornerRadius, 0, Math.PI * 1/2, false);
+    path.lineTo(-width/2+cornerRadius,yOffset + height);
+    path.arc(-width/2+cornerRadius,yOffset + height-cornerRadius, cornerRadius, Math.PI/2, Math.PI, false);
+    path.closePath();
+
+    let centerX = -width/2 + width/5;
+    let centerY = yOffset + height/2; 
+    let radius = 8;
+    path.moveTo( centerX+ radius, centerY);
+    path.arc(centerX, centerY, radius, 0, Math.PI, false);
+    path.arc(centerX, centerY, radius, Math.PI, 2*Math.PI, false);
+    for (let i = 0; i < 5; i++) {
+      let xLoc = width/2 - 8*(i+1);
+      path.moveTo(xLoc, yOffset + height *0.2);
+      path.lineTo(xLoc, yOffset + height *0.8);
+    }
+
+    return path;
+  }
+
   updateGraph() {
     if (!this.rootElement) {
       return;
@@ -193,8 +333,19 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
           (node as any).fx = null;
           (node as any).fy = null;
         }));
-      
-    var circles = node.append("circle")
+
+    var computers = node.filter((d:NetworkNode) => {return d.type == NodeType.NODE})
+        .append("path")
+        .attr("class", "server")
+        .on("click", (d:any) => {this.click(d)})
+        .attr("d", this.formComputerImage())
+        .attr("stroke", "white")
+        .attr("stroke-width", 3)
+
+    var circles = node.filter((d:NetworkNode) => {return d.type != NodeType.NODE})
+      .append("circle")
+      .on("click", (d:any) => {this.click(d)})
+      .attr("class", (d: NetworkNode) => d.type)
       .attr("r", (d: NetworkNode) => { return this.nodeRadius(d);})
       .attr("fill", (d: NetworkNode) => { return this.nodeColor(d);});
     
@@ -206,13 +357,13 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
   
     node.append("title")
       .text(function(d: { id: any; }) { return d.id; });
-  
+    node.exit().remove();
     this.simulation
       .nodes(this.graphNodes)
       .on("tick", ticked);
   
     let x = this.simulation
-      .force("charge", d3.forceManyBody().strength(-350))
+      .force("charge", d3.forceManyBody().strength(-800))
       .force("link");
     if (x) {
       x.links(this.graphLinks);
