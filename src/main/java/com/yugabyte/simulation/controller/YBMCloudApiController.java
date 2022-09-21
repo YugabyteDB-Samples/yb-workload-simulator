@@ -3,11 +3,13 @@ package com.yugabyte.simulation.controller;
 import com.yugabyte.simulation.model.ybm.YbmNodeListResponseModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,22 +34,60 @@ public class YBMCloudApiController {
     @Autowired
     private WebClient.Builder webClientBuilder;
 
+    @GetMapping("/api/ybm/nodes")
+    public YbmNodeListResponseModel getListOfNodesApi(){
+        return getNodeList(accountId,projectId,clusterId);
+    }
+
+    @GetMapping("/api/ybm/projects")
+    public String getProjects(){
+        StringBuilder sb = new StringBuilder(baseUri);
+        sb.append("/").append(accountId).append("/projects");
+
+        String responseFromCall = null;
+
+        try {
+            responseFromCall = webClientBuilder.build()
+                    .get()
+                    .uri(sb.toString())
+                    .header("Authorization","Bearer "+apiKey)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
+        } catch (Exception e) {
+            responseFromCall = "error:"+e.getMessage();
+        }
+
+        return responseFromCall;
+    }
+
+    @GetMapping("/api/ybm/clusters/")
+    public String getClusters(){
+        StringBuilder sb = new StringBuilder(baseUri);
+        sb.append("/").append(accountId).append("/projects/").append(projectId).append("/clusters");
+
+        String responseFromCall = null;
+        try {
+            responseFromCall = webClientBuilder.build()
+                    .get()
+                    .uri(sb.toString())
+                    .header("Authorization","Bearer "+apiKey)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
+        } catch (Exception e) {
+            responseFromCall = "error:"+e.getMessage();
+        }
+
+        return responseFromCall;
+    }
+
+
     @GetMapping("/api/ybm/restartnodes")
     public List<String>  restartNodes(){
-        // Lets first find the list of stopped nodes.
-        StringBuilder sbUri = new StringBuilder(baseUri);
-        sbUri.append("/").append(accountId).append("/projects/").append(projectId).append("/clusters/").append(clusterId).append("/nodes");
         List<String> response = new ArrayList<>();
-
-        YbmNodeListResponseModel model = webClientBuilder.build()
-                .get()
-                .uri(sbUri.toString())
-                .header("Authorization","Bearer "+apiKey)
-                .retrieve()
-                .bodyToMono(YbmNodeListResponseModel.class)
-                .block()
-                ;
-
+        // Lets first find the list of stopped nodes.
+        YbmNodeListResponseModel model = getNodeList(accountId,projectId,clusterId);
         List<String> stoppedNodes = new ArrayList<>();
 
         if(model != null && model.data != null){
@@ -76,16 +116,21 @@ public class YBMCloudApiController {
                     "  \"action\": \"START\",\n" +
                     "  \"node_name\": \""+nodeName+"\"\n" +
                     "}";
-            String responseFromCall = webClientBuilder.build()
-                    .post()
-                    .uri(sbUriToStartNodes.toString())
-                    .header("Authorization","Bearer "+apiKey)
-                    .header("Content-Type","application/json")
-                    .body(BodyInserters.fromValue(body))
-                    .retrieve()
-                    .bodyToMono(String.class)
-                    .block()
+            String responseFromCall = null
                     ;
+            try {
+                responseFromCall = webClientBuilder.build()
+                        .post()
+                        .uri(sbUriToStartNodes.toString())
+                        .header("Authorization","Bearer "+apiKey)
+                        .header("Content-Type","application/json")
+                        .body(BodyInserters.fromValue(body))
+                        .retrieve()
+                        .bodyToMono(String.class)
+                        .block();
+            } catch (Exception e) {
+                responseFromCall = "error:"+e.getMessage();
+            }
             response.add(responseFromCall);
             System.out.println("responseFromCall:"+responseFromCall);
         }
@@ -93,31 +138,64 @@ public class YBMCloudApiController {
 
     }
 
-    @GetMapping("/api/ybm/stopnode/{nodename}")
-    public String stopNode(@PathVariable String nodename){
+    @GetMapping("/api/ybm/stopnodes/{nodenames}")
+    public List<String> stopNodes(@PathVariable String[] nodenames){
+        List<String> listOfResponses = new ArrayList<>();
         // Lets first find the list of stopped nodes.
         StringBuilder sbUri = new StringBuilder(baseUri);
         sbUri.append("/").append(accountId).append("/projects/").append(projectId).append("/clusters/").append(clusterId).append("/nodes/op");
 
-        String body = "{\n" +
-                "  \"action\": \"STOP\",\n" +
-                "  \"node_name\": \""+nodename+"\"\n" +
-                "}";
+        for(String nodename: nodenames){
+            String body = "{\n" +
+                    "  \"action\": \"STOP\",\n" +
+                    "  \"node_name\": \""+nodename+"\"\n" +
+                    "}";
+            String responseFromCall = null;
+            try{
+                responseFromCall = webClientBuilder.build()
+                        .post()
+                        .uri(sbUri.toString())
+                        .header("Authorization","Bearer "+apiKey)
+                        .header("Content-Type","application/json")
+                        .body(BodyInserters.fromValue(body))
+                        .retrieve()
+                        .bodyToMono(String.class)
+                        .block()
+                        ;
+                System.out.println("responseFromCall:"+responseFromCall);
 
+            }
+            catch(Exception e){
+                responseFromCall = "error:"+e.getMessage();
+            }
+            listOfResponses.add(responseFromCall);
 
-        String responseFromCall = webClientBuilder.build()
-                .post()
-                .uri(sbUri.toString())
-                .header("Authorization","Bearer "+apiKey)
-                .header("Content-Type","application/json")
-                .body(BodyInserters.fromValue(body))
-                .retrieve()
-                .bodyToMono(String.class)
-                .block()
+        }
+
+        return listOfResponses;
+    }
+
+    private Mono<? extends Throwable> handleError(String message) {
+        return Mono.error(Exception::new);
+    }
+
+    private YbmNodeListResponseModel getNodeList(String accountId, String projectId, String clusterId){
+        StringBuilder sbUri = new StringBuilder(baseUri);
+        sbUri.append("/").append(accountId).append("/projects/").append(projectId).append("/clusters/").append(clusterId).append("/nodes");
+        YbmNodeListResponseModel model = null
                 ;
-        System.out.println("responseFromCall:"+responseFromCall);
-        return responseFromCall;
-
+        try {
+            model = webClientBuilder.build()
+                    .get()
+                    .uri(sbUri.toString())
+                    .header("Authorization","Bearer "+apiKey)
+                    .retrieve()
+                    .bodyToMono(YbmNodeListResponseModel.class)
+                    .block();
+        } catch (Exception e) {
+            System.out.println("error:"+e.getMessage());
+        }
+        return model;
     }
 
 
