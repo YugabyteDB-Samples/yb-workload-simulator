@@ -29,7 +29,7 @@
       <div class="grid">
         <div class="col" style="height: 600px;">
           <div style = "width: 100%; height: 100%; background-color: black;">
-            <app-network-diagram [graphRefreshMs]="systemPreferences.graphRefreshMs"></app-network-diagram>
+            <app-network-diagram [graphRefreshMs]="systemPreferences.graphRefreshMs" [yugabyteOffering]="ybOption"></app-network-diagram>
           </div>
         </div>
         <div class="col" style="height: 600px;">
@@ -50,10 +50,37 @@
   <span class="fa-solid fa-bars"></span>
 </div>
 
+<p-dialog [(visible)]="showConfigDialog" header="Configuration" [modal]="true" [draggable]="true" [closable]="false" [style]="{width: '50vw'}">
+  <div class="grid">
+    <div class="col-3 text-right">
+      <label for="ybOptions">Database in Use:</label>
+    </div>
+    <div class="col-9">
+      <p-dropdown id="ybOptions" appendTo="body" [options]="ybOptions" [(ngModel)]="ybOption"></p-dropdown>      
+    </div>
+  </div>
+  <div *ngIf="ybOption === 'Yugabyte Managed'">
+    <div class="grid">
+      <div class="col-3 text-right">
+        <label for="accessKey">Database in Use:</label>
+      </div>
+      <div class="col-9">
+        <p-dropdown id="ybOptions" [options]="ybOptions" [(ngModel)]="ybOption"></p-dropdown>      
+      </div>
+    </div>
+    </div>
+  <ng-template pTemplate="footer">
+    <div class="status mt-3" style="color: lightblue; text-align: left; display: inline-block; width: 80%">
+      {{status}}
+    </div>
+    <p-button icon="pi pi-check" (click)="closeDialog()" label="Close"></p-button>
+  </ng-template>
+</p-dialog>
 
 <p-dialog [(visible)]="commsErrorDialog" header="Communications Error" [modal]="true" [closable]="false">
   Communications with the server cannot be established. Please check network connectivity.
 </p-dialog>
+
 <p-dialog [(visible)]="showDialog" [header]="'Workload Management for ' + systemPreferences.workloadName" [modal]="true" [style]="{width: '50vw', height: '75%'}" 
       [draggable]="true" [resizable]="true" [closable]="true" [focusOnShow]="true" [maximizable]="true" (onHide)="closeDialog()">
 

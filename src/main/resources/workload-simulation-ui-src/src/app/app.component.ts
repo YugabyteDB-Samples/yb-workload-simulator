@@ -70,6 +70,10 @@ export class AppComponent implements AfterViewInit, OnInit {
   private maxDuration = this.MAX_READINGS * 1000;
   duration = 3 * 60 * 1000;
 
+  ybOptions = ['Yugabyte DB', 'Yugabyte Anywhere', 'Yugabyte Managed'];
+  ybOption = 'Yugabyte DB';
+  showConfigDialog = false;
+
   constructor(private dataSource : YugabyteDataSourceService,
             private workloadService : WorkloadService ) {
     this.timer = setInterval(() => {
