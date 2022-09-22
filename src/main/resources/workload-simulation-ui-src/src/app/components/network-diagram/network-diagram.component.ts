@@ -40,11 +40,17 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
   private timer : any;
 
   private d3link : any = d3;
+  status = "0 nodes selected";
 
-  private selectedItems : NetworkNode[] = []; // A set of the selected items with the id as the key
+  selectedItems : NetworkNode[] = []; // A set of the selected items with the id as the key
 
   graphNodes: NetworkNode[] = [];
   graphLinks: NetworkLink[] = [];
+  nodeCount = 0;
+  missingNodes = [];
+  
+  @Input()
+  yugabyteOffering = 'Yugabyte MDB';
 
   @ViewChild('network')
   network! : ElementRef;
@@ -75,6 +81,9 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
   }
 
   ngOnChanges(changes: SimpleChanges): void {
+    if (changes.yugabyteOffering) {
+      this.yugabyteOffering = changes.yugabyteOffering.currentValue;
+    }
     if (changes.graphRefreshMs) {
       clearInterval(this.timer);
       this.timer = setInterval(() => {
@@ -102,6 +111,7 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
     let allNodes : NetworkNode[] = [];
     let allLinks : NetworkLink[] = [];
 
+    this.nodeCount = 0;
     for (let i = 0; i < nodes.length; i++) {
       let thisNode = nodes[i];
       if (!regions.find(node => node.id == thisNode.region)) {
@@ -123,6 +133,7 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
       }
 
       allNodes.push({id: thisNode.host, type: NodeType.NODE});
+      this.nodeCount++;
       allLinks.push({source: thisNode.zone, target: thisNode.host, value: 1});
     }
     this.graphLinks = allLinks;
