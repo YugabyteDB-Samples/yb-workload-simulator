@@ -3,9 +3,8 @@ package com.yugabyte.simulation.controller;
 import com.yugabyte.simulation.model.ybm.YbmNodeListResponseModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -35,14 +34,32 @@ public class YBMCloudApiController {
     private WebClient.Builder webClientBuilder;
 
     @GetMapping("/api/ybm/nodes")
-    public YbmNodeListResponseModel getListOfNodesApi(){
-        return getNodeList(accountId,projectId,clusterId);
+    public YbmNodeListResponseModel getListOfNodesApi(@RequestParam(name = "accountid", required = false) String aAccountId
+            ,@RequestParam(name = "projectid", required = false) String aProjectId
+            ,@RequestParam(name = "clusterid", required = false) String aClusterId
+            ){
+
+        // If the accountid, projectid and clusterid are not coming as part of the request, we will use the one provided by java params or yaml file
+        if(aAccountId == null){
+            aAccountId = accountId;
+        }
+        if(aProjectId == null){
+            aProjectId = projectId;
+        }
+        if(aClusterId == null){
+            aClusterId = clusterId;
+        }
+
+        return getNodeList(aAccountId,aProjectId,aClusterId);
     }
 
     @GetMapping("/api/ybm/projects")
-    public String getProjects(){
+    public String getProjects(@RequestParam(name = "accountid", required = false) String aAccountId){
+        if(aAccountId == null){
+            aAccountId = accountId;
+        }
         StringBuilder sb = new StringBuilder(baseUri);
-        sb.append("/").append(accountId).append("/projects");
+        sb.append("/").append(aAccountId).append("/projects");
 
         String responseFromCall = null;
 
@@ -61,10 +78,18 @@ public class YBMCloudApiController {
         return responseFromCall;
     }
 
-    @GetMapping("/api/ybm/clusters/")
-    public String getClusters(){
+    @GetMapping("/api/ybm/clusters")
+    public String getClusters(@RequestParam(name = "accountid", required = false) String aAccountId
+                                ,@RequestParam(name = "projectid", required = false) String aProjectId){
+        // If the accountid, projectid are not coming as part of the request, we will use the one provided by java params or yaml file
+        if(aAccountId == null){
+            aAccountId = accountId;
+        }
+        if(aProjectId == null){
+            aProjectId = projectId;
+        }
         StringBuilder sb = new StringBuilder(baseUri);
-        sb.append("/").append(accountId).append("/projects/").append(projectId).append("/clusters");
+        sb.append("/").append(aAccountId).append("/projects/").append(aProjectId).append("/clusters");
 
         String responseFromCall = null;
         try {
@@ -84,10 +109,24 @@ public class YBMCloudApiController {
 
 
     @GetMapping("/api/ybm/restartnodes")
-    public List<String>  restartNodes(){
+    public List<String>  restartNodes(@RequestParam(name = "accountid", required = false) String aAccountId
+            ,@RequestParam(name = "projectid", required = false) String aProjectId
+            ,@RequestParam(name = "clusterid", required = false) String aClusterId){
+
+        // If the accountid, projectid and clusterid are not coming as part of the request, we will use the one provided by java params or yaml file
+        if(aAccountId == null){
+            aAccountId = accountId;
+        }
+        if(aProjectId == null){
+            aProjectId = projectId;
+        }
+        if(aClusterId == null){
+            aClusterId = clusterId;
+        }
+
         List<String> response = new ArrayList<>();
         // Lets first find the list of stopped nodes.
-        YbmNodeListResponseModel model = getNodeList(accountId,projectId,clusterId);
+        YbmNodeListResponseModel model = getNodeList(aAccountId,aProjectId,aClusterId);
         List<String> stoppedNodes = new ArrayList<>();
 
         if(model != null && model.data != null){
@@ -111,7 +150,7 @@ public class YBMCloudApiController {
         // We will start the stopped nodes now.
         for(String nodeName: stoppedNodes){
             StringBuilder sbUriToStartNodes = new StringBuilder(baseUri);
-            sbUriToStartNodes.append("/").append(accountId).append("/projects/").append(projectId).append("/clusters/").append(clusterId).append("/nodes/op");
+            sbUriToStartNodes.append("/").append(aAccountId).append("/projects/").append(aProjectId).append("/clusters/").append(aClusterId).append("/nodes/op");
             String body = "{\n" +
                     "  \"action\": \"START\",\n" +
                     "  \"node_name\": \""+nodeName+"\"\n" +
@@ -138,14 +177,31 @@ public class YBMCloudApiController {
 
     }
 
-    @GetMapping("/api/ybm/stopnodes/{nodenames}")
-    public List<String> stopNodes(@PathVariable String[] nodenames){
+    @GetMapping("/api/ybm/stopnodes")
+    public List<String> stopNodes(@RequestParam(name = "nodenames", required = true) String nodenames
+                                    ,@RequestParam(name = "accountid", required = false) String aAccountId
+                                    ,@RequestParam(name = "projectid", required = false) String aProjectId
+                                    ,@RequestParam(name = "clusterid", required = false) String aClusterId){
+
+        // If the accountid, projectid and clusterid are not coming as part of the request, we will use the one provided by java params or yaml file
+        if(aAccountId == null){
+            aAccountId = accountId;
+        }
+        if(aProjectId == null){
+            aProjectId = projectId;
+        }
+        if(aClusterId == null){
+            aClusterId = clusterId;
+        }
+
+        String []nodeList =nodenames.split(",");
+
         List<String> listOfResponses = new ArrayList<>();
         // Lets first find the list of stopped nodes.
         StringBuilder sbUri = new StringBuilder(baseUri);
-        sbUri.append("/").append(accountId).append("/projects/").append(projectId).append("/clusters/").append(clusterId).append("/nodes/op");
+        sbUri.append("/").append(aAccountId).append("/projects/").append(aProjectId).append("/clusters/").append(aClusterId).append("/nodes/op");
 
-        for(String nodename: nodenames){
+        for(String nodename: nodeList){
             String body = "{\n" +
                     "  \"action\": \"STOP\",\n" +
                     "  \"node_name\": \""+nodename+"\"\n" +
@@ -175,15 +231,11 @@ public class YBMCloudApiController {
         return listOfResponses;
     }
 
-    private Mono<? extends Throwable> handleError(String message) {
-        return Mono.error(Exception::new);
-    }
 
     private YbmNodeListResponseModel getNodeList(String accountId, String projectId, String clusterId){
         StringBuilder sbUri = new StringBuilder(baseUri);
         sbUri.append("/").append(accountId).append("/projects/").append(projectId).append("/clusters/").append(clusterId).append("/nodes");
-        YbmNodeListResponseModel model = null
-                ;
+        YbmNodeListResponseModel model = null;
         try {
             model = webClientBuilder.build()
                     .get()
