@@ -1,8 +1,9 @@
 package com.yugabyte.simulation.controller;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.yugabyte.simulation.model.ybm.YbmNodeListResponseModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,7 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import com.yugabyte.simulation.model.ybm.YbmNodeListResponseModel;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 public class YBMCloudApiController {
@@ -232,6 +234,72 @@ public class YBMCloudApiController {
     }
 
 
+    @GetMapping("/api/ybm/scale")
+    public String scaleCluster(@RequestParam(name = "accountid", required = false) String aAccountId
+            ,@RequestParam(name = "projectid", required = false) String aProjectId
+            ,@RequestParam(name = "clusterid", required = false) String aClusterId
+            ,@RequestParam(name = "numnodes", required = true) int numnodes){
+
+        if(aAccountId == null){
+            aAccountId = accountId;
+        }
+        if(aProjectId == null){
+            aProjectId = projectId;
+        }
+        if(aClusterId == null){
+            aClusterId = clusterId;
+        }
+        String responseFromCall = null;
+
+        // Lets get the cluster details first. We will use this info to send a put request.
+        String clusterInfoJson = getClusterDetails(aAccountId,aProjectId,aClusterId);
+        /*
+        sample for reference:
+        clusterInfoJson:{"data":{"spec":{"name":"dynamic-ermine","cloud_info":{"code":"AWS","region":"us-east-2"},"cluster_info":{"cluster_tier":"PAID","cluster_type":"SYNCHRONOUS","num_nodes":3,"fault_tolerance":"ZONE","node_info":{"num_cores":8,"memory_mb":32768,"disk_size_gb":400},"is_production":true,"version":34},"network_info":{"single_tenant_vpc_id":"998c0742-8894-41eb-8ee8-3a2fcd8e474b"},"software_info":{"track_id":"d9618d5e-9591-445b-a280-705770f5fb30"},"cluster_region_info":[{"placement_info":{"cloud_info":{"code":"AWS","region":"us-east-2"},"num_nodes":3,"vpc_id":"998c0742-8894-41eb-8ee8-3a2fcd8e474b","num_replicas":null,"multi_zone":true},"is_default":true,"is_affinitized":true}]},"info":{"id":"250c053d-921e-481c-9143-754f6f906377","state":"Active","endpoint":"us-east-2.250c053d-921e-481c-9143-754f6f906377.aws.ybdb.io","endpoints":{"us-east-2":"us-east-2.250c053d-921e-481c-9143-754f6f906377.aws.ybdb.io"},"project_id":"773f1a68-4efa-46a5-9a60-87c3b0f045df","software_version":"2.14.1.0-b36","cluster_network_version":"V2","read_replica_info":[],"metadata":{"created_on":"2022-09-20T20:15:51.180Z","updated_on":"2022-09-22T20:31:04.692Z"}}}}
+         */
+        System.out.println("clusterInfoJson:"+clusterInfoJson);
+
+        try{
+            // Need to clean this  code. It is such a kludge right now.
+            ObjectNode node = new ObjectMapper().readValue(clusterInfoJson, ObjectNode.class);
+            JsonNode specNode = node.get("data").get("spec");
+            ObjectNode clusterInfo = (ObjectNode)specNode.get("cluster_info");
+            clusterInfo.put("num_nodes",numnodes);
+
+            JsonNode clusterRegionInfo =  specNode.get("cluster_region_info");
+            if(clusterRegionInfo.isArray()){
+                for(JsonNode arrNode: clusterRegionInfo){
+                    ((ObjectNode)arrNode.get("placement_info")).put("num_nodes",numnodes);
+                }
+            }
+//            System.out.println(specNode.toPrettyString());
+
+            // this is good call body example
+            //String test = "{\n  \"cloud_info\": {\n    \"code\": \"AWS\",\n    \"region\": \"us-east-2\"\n  },\n  \"cluster_info\": {\n    \"cluster_tier\": \"PAID\",\n    \"cluster_type\": \"SYNCHRONOUS\",\n    \"fault_tolerance\": \"ZONE\",\n    \"is_production\": true,\n    \"node_info\": {\n      \"disk_size_gb\": 400,\n      \"memory_mb\": 32768,\n      \"num_cores\": 8\n    },\n    \"num_nodes\": 6,\n    \"version\": 34\n  },\n  \"cluster_region_info\": [\n    {\n      \"is_affinitized\": true,\n      \"is_default\": true,\n      \"placement_info\": {\n        \"cloud_info\": {\n          \"code\": \"AWS\",\n          \"region\": \"us-east-2\"\n        },\n        \"multi_zone\": true,\n        \"num_nodes\": 6,\n        \"num_replicas\": null,\n        \"vpc_id\": \"998c0742-8894-41eb-8ee8-3a2fcd8e474b\"\n      }\n    }\n  ],\n  \"name\": \"dynamic-ermine\",\n  \"network_info\": {\n    \"single_tenant_vpc_id\": \"998c0742-8894-41eb-8ee8-3a2fcd8e474b\"\n  },\n  \"software_info\": {\n    \"track_id\": \"d9618d5e-9591-445b-a280-705770f5fb30\"\n  }\n}";
+            // we are ready to make the PUT call now
+            StringBuffer sb = new StringBuffer(baseUri);
+            sb.append("/").append(accountId).append("/projects/").append(projectId).append("/clusters/").append(clusterId);
+            responseFromCall = webClientBuilder.build()
+                    .put()
+                    .uri(sb.toString())
+                    .header("Authorization","Bearer "+apiKey)
+                    .header("Content-Type","application/json")
+                    .bodyValue(specNode.toPrettyString())
+                    //.body(BodyInserters.fromValue(specNode.toString()))
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block()
+            ;
+            System.out.println("responseFromCall:"+responseFromCall);
+        }
+        catch (Exception e){
+            e.printStackTrace();
+            responseFromCall = "error:"+e.getMessage();
+        }
+        return responseFromCall;
+    }
+
+
     private YbmNodeListResponseModel getNodeList(String accountId, String projectId, String clusterId){
         StringBuilder sbUri = new StringBuilder(baseUri);
         sbUri.append("/").append(accountId).append("/projects/").append(projectId).append("/clusters/").append(clusterId).append("/nodes");
@@ -248,6 +316,27 @@ public class YBMCloudApiController {
             System.out.println("error:"+e.getMessage());
         }
         return model;
+    }
+
+    private String getClusterDetails(String accountId, String projectId, String clusterId){
+        StringBuilder sb = new StringBuilder(baseUri);
+        sb.append("/").append(accountId).append("/projects/").append(projectId).append("/clusters/").append(clusterId);
+
+        String responseFromCall = null;
+
+        try {
+            responseFromCall = webClientBuilder.build()
+                    .get()
+                    .uri(sb.toString())
+                    .header("Authorization","Bearer "+apiKey)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
+        } catch (Exception e) {
+            responseFromCall = "error:"+e.getMessage();
+        }
+
+        return responseFromCall;
     }
 
 
