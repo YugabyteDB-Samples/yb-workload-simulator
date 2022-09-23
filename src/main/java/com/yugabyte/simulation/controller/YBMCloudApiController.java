@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.yugabyte.simulation.model.ybm.YbmNodeListResponseModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -36,9 +38,9 @@ public class YBMCloudApiController {
     private WebClient.Builder webClientBuilder;
 
     @GetMapping("/api/ybm/nodes")
-    public YbmNodeListResponseModel getListOfNodesApi(@RequestParam(name = "accountid", required = false) String aAccountId
-            ,@RequestParam(name = "projectid", required = false) String aProjectId
-            ,@RequestParam(name = "clusterid", required = false) String aClusterId
+    public ResponseEntity<YbmNodeListResponseModel> getListOfNodesApi(@RequestParam(name = "accountid", required = false) String aAccountId
+            , @RequestParam(name = "projectid", required = false) String aProjectId
+            , @RequestParam(name = "clusterid", required = false) String aClusterId
             ){
 
         // If the accountid, projectid and clusterid are not coming as part of the request, we will use the one provided by java params or yaml file
@@ -52,11 +54,18 @@ public class YBMCloudApiController {
             aClusterId = clusterId;
         }
 
-        return getNodeList(aAccountId,aProjectId,aClusterId);
+        YbmNodeListResponseModel model = getNodeList(aAccountId,aProjectId,aClusterId);
+        System.out.println("model:"+model);
+
+        if(model == null){
+            return new ResponseEntity<>(new YbmNodeListResponseModel(), HttpStatus.BAD_REQUEST);
+        }
+
+        return new ResponseEntity<>(model, HttpStatus.OK);
     }
 
     @GetMapping("/api/ybm/projects")
-    public String getProjects(@RequestParam(name = "accountid", required = false) String aAccountId){
+    public ResponseEntity<String> getProjects(@RequestParam(name = "accountid", required = false) String aAccountId){
         if(aAccountId == null){
             aAccountId = accountId;
         }
@@ -75,13 +84,14 @@ public class YBMCloudApiController {
                     .block();
         } catch (Exception e) {
             responseFromCall = "error:"+e.getMessage();
+            return new ResponseEntity<>(responseFromCall,HttpStatus.BAD_REQUEST);
         }
 
-        return responseFromCall;
+        return new ResponseEntity<>(responseFromCall,HttpStatus.OK);
     }
 
     @GetMapping("/api/ybm/clusters")
-    public String getClusters(@RequestParam(name = "accountid", required = false) String aAccountId
+    public ResponseEntity<String> getClusters(@RequestParam(name = "accountid", required = false) String aAccountId
                                 ,@RequestParam(name = "projectid", required = false) String aProjectId){
         // If the accountid, projectid are not coming as part of the request, we will use the one provided by java params or yaml file
         if(aAccountId == null){
@@ -104,14 +114,15 @@ public class YBMCloudApiController {
                     .block();
         } catch (Exception e) {
             responseFromCall = "error:"+e.getMessage();
+            return new ResponseEntity<>(responseFromCall,HttpStatus.BAD_REQUEST);
         }
 
-        return responseFromCall;
+        return new ResponseEntity<>(responseFromCall, HttpStatus.OK);
     }
 
 
     @GetMapping("/api/ybm/restartnodes")
-    public List<String>  restartNodes(@RequestParam(name = "accountid", required = false) String aAccountId
+    public ResponseEntity<List<String>>  restartNodes(@RequestParam(name = "accountid", required = false) String aAccountId
             ,@RequestParam(name = "projectid", required = false) String aProjectId
             ,@RequestParam(name = "clusterid", required = false) String aClusterId){
 
@@ -140,15 +151,16 @@ public class YBMCloudApiController {
         }
         else{
             response.add("I couldn't find the stopped node");
-            return response;
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
         System.out.println("Number of stopped nodes:"+stoppedNodes.size());
 
         if(stoppedNodes.size() == 0){
             response.add("All Nodes are Up and nothing to restart!");
-            return response;
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
 
+        boolean errorEncountered = false;
         // We will start the stopped nodes now.
         for(String nodeName: stoppedNodes){
             StringBuilder sbUriToStartNodes = new StringBuilder(baseUri);
@@ -171,16 +183,17 @@ public class YBMCloudApiController {
                         .block();
             } catch (Exception e) {
                 responseFromCall = "error:"+e.getMessage();
+                errorEncountered = true;
             }
             response.add(responseFromCall);
             System.out.println("responseFromCall:"+responseFromCall);
         }
-        return response;
+        return new ResponseEntity<>(response, errorEncountered?HttpStatus.BAD_REQUEST:HttpStatus.OK);
 
     }
 
     @GetMapping("/api/ybm/stopnodes")
-    public List<String> stopNodes(@RequestParam(name = "nodenames", required = true) String nodenames
+        public ResponseEntity<List<String>> stopNodes(@RequestParam(name = "nodenames", required = true) String nodenames
                                     ,@RequestParam(name = "accountid", required = false) String aAccountId
                                     ,@RequestParam(name = "projectid", required = false) String aProjectId
                                     ,@RequestParam(name = "clusterid", required = false) String aClusterId){
@@ -202,6 +215,8 @@ public class YBMCloudApiController {
         // Lets first find the list of stopped nodes.
         StringBuilder sbUri = new StringBuilder(baseUri);
         sbUri.append("/").append(aAccountId).append("/projects/").append(aProjectId).append("/clusters/").append(aClusterId).append("/nodes/op");
+
+        boolean errorEncountered = false;
 
         for(String nodename: nodeList){
             String body = "{\n" +
@@ -225,17 +240,18 @@ public class YBMCloudApiController {
             }
             catch(Exception e){
                 responseFromCall = "error:"+e.getMessage();
+                errorEncountered = true;
             }
             listOfResponses.add(responseFromCall);
 
         }
 
-        return listOfResponses;
+        return new ResponseEntity<>(listOfResponses,errorEncountered?HttpStatus.BAD_REQUEST:HttpStatus.OK);
     }
 
 
     @GetMapping("/api/ybm/scale")
-    public String scaleCluster(@RequestParam(name = "accountid", required = false) String aAccountId
+    public ResponseEntity<String> scaleCluster(@RequestParam(name = "accountid", required = false) String aAccountId
             ,@RequestParam(name = "projectid", required = false) String aProjectId
             ,@RequestParam(name = "clusterid", required = false) String aClusterId
             ,@RequestParam(name = "numnodes", required = true) int numnodes){
@@ -295,8 +311,9 @@ public class YBMCloudApiController {
         catch (Exception e){
             e.printStackTrace();
             responseFromCall = "error:"+e.getMessage();
+            return new ResponseEntity<>(responseFromCall,HttpStatus.BAD_REQUEST);
         }
-        return responseFromCall;
+        return new ResponseEntity<>(responseFromCall,HttpStatus.OK);
     }
 
 
