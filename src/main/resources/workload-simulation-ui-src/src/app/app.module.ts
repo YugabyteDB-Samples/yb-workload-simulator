@@ -7,8 +7,10 @@ import { ThroughputComponent } from './components/throughput/throughput.componen
 import { StatisticsGraphComponent } from './components/statistics-graph/statistics-graph.component';
 import { HttpClientModule } from '@angular/common/http';
 import { NetworkDiagramComponent } from './components/network-diagram/network-diagram.component';
+
 import { AccordionModule } from 'primeng/accordion';
 import { ButtonModule } from 'primeng/button';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DialogModule } from 'primeng/dialog';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputSwitchModule } from 'primeng/inputswitch';
@@ -22,6 +24,9 @@ import { StepsModule } from 'primeng/steps'
 import { FormsModule } from '@angular/forms';
 import { TableModule } from 'primeng/table';
 import { TabViewModule } from 'primeng/tabview';
+import { ToastModule } from 'primeng/toast';
+
+import { ConfirmationService, MessageService } from 'primeng/api';
 
 import { WorkloadService } from './services/workload-service.service';
 import { StepsDiagramComponent } from './components/steps-diagram/steps-diagram.component';
@@ -29,6 +34,7 @@ import { RouterModule } from '@angular/router';
 import { FixedStepWorkloadComponent } from './components/fixed-step-workload/fixed-step-workload.component';
 import { ThroughputWorkloadComponent } from './components/throughput-workload/throughput-workload.component';
 import { FixedTargetWorkloadComponent } from './components/fixed-target-workload/fixed-target-workload.component';
+
 
 @NgModule({
   declarations: [
@@ -46,6 +52,8 @@ import { FixedTargetWorkloadComponent } from './components/fixed-target-workload
     BrowserModule,
     BrowserAnimationsModule,
     ButtonModule,
+    ConfirmDialogModule,
+    // ConfirmationService,
     DialogModule,
     DropdownModule,
     HttpClientModule,
@@ -53,6 +61,7 @@ import { FixedTargetWorkloadComponent } from './components/fixed-target-workload
     InputSwitchModule,
     InputTextModule,
     MenuModule,
+    // MessageService,
     PanelModule,
     SliderModule,
     StepsModule,
@@ -60,6 +69,7 @@ import { FixedTargetWorkloadComponent } from './components/fixed-target-workload
     SelectButtonModule,
     TabViewModule,
     TableModule,
+    ToastModule,
     RouterModule.forRoot([
       {path:'', component: AppComponent}
     ])

@@ -1,3 +1,5 @@
+<p-toast position="top-center" key="tc"></p-toast>
+
 <div style="position: relative; height: 100%; width: 100%;">
     <figure #network id="network" style="height: 100%; width: 100%"></figure>
     <div class="status grid" style="margin: 0;" *ngIf="yugabyteOffering == 'Yugabyte Managed'">
@@ -5,7 +7,7 @@
         <div class="col-4 d-inline-block pt-0">
             <p-button label="Stop Selected Nodes" icon="fa-solid fa-stop" badge="{{selectedItems.length}}" 
             [disabled]="selectedItems.length == 0" class="p-button-sm p-button-secondary" styleClass="p-button-secondary" [style]="{'width' : '100%'}" 
-            badgeClass="p-button-secondary"></p-button>
+            badgeClass="p-button-secondary" (click)="confirmStopNodes()"></p-button>
         </div>
         <div class="col-4 d-inline-block pt-0">
             <p-button label="Restart Missing Nodes" icon="fa-solid fa-play" badge="{{missingNodes.length}}" 
@@ -14,4 +16,6 @@
         </div>
     </div>
 </div>
+
+<p-confirmDialog [style]="{width: '50vw'}" [baseZIndex]="10000" rejectButtonStyleClass="p-button-text"></p-confirmDialog>
 

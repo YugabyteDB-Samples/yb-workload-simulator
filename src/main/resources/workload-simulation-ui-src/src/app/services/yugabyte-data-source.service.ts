@@ -1,14 +1,12 @@
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { YBServerModel } from '../model/yb-server-model.model';
-import { TimingData } from '../model/timing-data.model';
-import { WorkloadDesc } from '../model/workload-desc.model';
-import { ParamValue } from '../model/param-value.model';
 import { InvocationResult } from '../model/invocation-result.model';
-import { WorkloadStatus } from '../model/workload-status.model';
-import { WorkloadResult } from '../model/workload-result.model';
+import { ParamValue } from '../model/param-value.model';
 import { SystemPreferences } from '../model/system-preferences.model';
+import { WorkloadDesc } from '../model/workload-desc.model';
+import { WorkloadResult } from '../model/workload-result.model';
+import { YBServerModel } from '../model/yb-server-model.model';
 
 const PROTOCOL = 'http';
 const PORT = 8080;
@@ -87,5 +85,11 @@ export class YugabyteDataSourceService {
 
   getSystemPreferences() {
     return this.http.get<SystemPreferences>(this.baseUrl+'api/get-system-preferences');
+  }
+
+  stopNodes(nodeIds : String[]) : Observable<String[]> {
+    let nodeStr = nodeIds.join(',');
+    let params = new HttpParams().set('nodenames', nodeStr);
+    return this.http.get<String[]>(this.baseUrl+'api/ybm/stopnodes', {params : params});
   }
 }

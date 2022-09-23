@@ -3,6 +3,7 @@ import * as d3 from 'd3';
 import { SimulationNodeDatum, ForceLink, SimulationLinkDatum } from 'd3';
 import { YBServerModel } from 'src/app/model/yb-server-model.model';
 import { YugabyteDataSourceService } from 'src/app/services/yugabyte-data-source.service';
+import { ConfirmationService, ConfirmEventType, MessageService } from 'primeng/api';
 
 enum NodeType {
   REGION, ZONE, NODE
@@ -26,7 +27,9 @@ interface FullDragEvent extends DragEvent {
 @Component({
   selector: 'app-network-diagram',
   templateUrl: './network-diagram.component.html',
-  styleUrls: ['./network-diagram.component.css']
+  styleUrls: ['./network-diagram.component.css'],
+  providers: [ConfirmationService, MessageService]
+
 })
 
 export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges {
@@ -59,7 +62,9 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
   graphRefreshMs = 1000;
 
   constructor(
-    private ybServer : YugabyteDataSourceService
+    private ybServer : YugabyteDataSourceService,
+    private confirmService : ConfirmationService,
+    private messageService : MessageService
   ) { 
   }
 
@@ -392,5 +397,37 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
             return "translate(" + d.x + "," + d.y + ")";
           });
     }
+  }
+
+  confirmStopNodes() {
+    let message = `Are you sure that you want to stop ${this.selectedItems.length} selected node`;
+    message = message + (this.selectedItems.length == 1 ? '?' : 's?'); 
+    this.confirmService.confirm({
+      message: message,
+      header: 'Confirmation',
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        let nodeIds = this.selectedItems.map(d => d.id);
+        this.messageService.add({severity:'info', summary:'Request Sent', detail:'Requesting nodes to be stopped...', key: 'tc'});
+        this.ybServer.stopNodes(nodeIds).subscribe(result => {
+          console.log(result);
+          this.messageService.add({severity:'info', summary:'Success', detail:'Successfully requested nodes to be stopped', key: 'tc'});
+        }, 
+        error => {
+          console.log("error stopping nodes " + nodeIds, error);
+          this.messageService.add({severity:'error', summary:'Error stopping node(s)', detail:'An error occurred submitting the request. The error returned was: ' + error, key: 'tc'});
+        }) ;
+      },
+      reject: () => {
+          // switch(type) {
+          //     case ConfirmEventType.REJECT:
+                  this.messageService.add({severity:'error', summary:'Rejected', detail:'You have rejected'});
+              // break;
+              // case ConfirmEventType.CANCEL:
+              //     this.messageService.add({severity:'warn', summary:'Cancelled', detail:'You have cancelled'});
+              // break;
+          // }
+      }
+    });
   }
 }

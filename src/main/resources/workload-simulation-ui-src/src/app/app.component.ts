@@ -71,7 +71,7 @@ export class AppComponent implements AfterViewInit, OnInit {
   duration = 3 * 60 * 1000;
 
   ybOptions = ['Yugabyte DB', 'Yugabyte Anywhere', 'Yugabyte Managed'];
-  ybOption = 'Yugabyte DB';
+  ybOption = 'Yugabyte Managed';
   showConfigDialog = false;
 
   constructor(private dataSource : YugabyteDataSourceService,
