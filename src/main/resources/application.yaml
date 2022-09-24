@@ -13,14 +13,14 @@ spring:
       maxLifeTime: ${max-life-time:3600000}
       data-source-class-name: com.yugabyte.ysql.YBClusterAwareDataSource
       data-source-properties:
-#        preferQueryMode: org.postgresql.jdbc.PreferQueryMode.EXTENDED_CACHE_EVERYTHING
         serverName: ${node:127.0.0.1}
         portNumber: ${port:5433}
         databaseName: ${dbname:yugabyte}
+        topologyKeys:
         #ssl: ${ssl:false}
         #sslmode: ${sslmode:disable}
         #sslrootcert: ${sslrootcert:~/.ssh/ybcloudcert/root.crt}
-        additionalEndpoints: ${additionalEndpoints:127.0.0.2:5433,127.0.03:5433}
+
   data:
     cassandra:
       local-datacenter: ${datacenter_c:DC1}
