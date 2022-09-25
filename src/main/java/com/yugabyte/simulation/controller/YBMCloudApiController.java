@@ -3,6 +3,9 @@ package com.yugabyte.simulation.controller;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.yugabyte.simulation.model.YBServerModel;
+import com.yugabyte.simulation.model.ybm.NodeInfo;
+import com.yugabyte.simulation.model.ybm.NodeInfoCloudInfo;
 import com.yugabyte.simulation.model.ybm.YbmNodeListResponseModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.w3c.dom.Node;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -317,7 +321,7 @@ public class YBMCloudApiController {
     }
 
 
-    private YbmNodeListResponseModel getNodeList(String accountId, String projectId, String clusterId){
+    public YbmNodeListResponseModel getNodeList(String accountId, String projectId, String clusterId){
         StringBuilder sbUri = new StringBuilder(baseUri);
         sbUri.append("/").append(accountId).append("/projects/").append(projectId).append("/clusters/").append(clusterId).append("/nodes");
         YbmNodeListResponseModel model = null;
@@ -333,6 +337,33 @@ public class YBMCloudApiController {
             System.out.println("error:"+e.getMessage());
         }
         return model;
+    }
+
+    public List<YBServerModel> getNodeListForTopology(){
+        if(accountId == null || projectId == null || clusterId == null){
+            return null;
+        }
+        List<YBServerModel> result = new ArrayList<>();
+        YbmNodeListResponseModel model = getNodeList(accountId,projectId,clusterId);
+        if(model != null){
+            List<NodeInfo> list = model.data;
+            for(NodeInfo node: list){
+                try {
+                    YBServerModel ybServerModel = new YBServerModel();
+                    NodeInfoCloudInfo nodeInfoCloudInfo = node.cloud_info;
+                    String nodeName = node.name;
+                    ybServerModel.setHost(nodeName);
+                    ybServerModel.setRegion(nodeInfoCloudInfo.region);
+                    ybServerModel.setZone(nodeInfoCloudInfo.zone);
+                    result.add(ybServerModel);
+                } catch (Exception e) {
+                    System.out.println("error:"+e.getMessage());
+                }
+            }
+        }
+        return result;
+
+
     }
 
     private String getClusterDetails(String accountId, String projectId, String clusterId){

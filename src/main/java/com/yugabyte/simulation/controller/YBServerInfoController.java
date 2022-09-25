@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.yugabyte.simulation.dao.WorkloadResult;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -22,8 +23,21 @@ public class YBServerInfoController {
     @Autowired
     private TimerService timerService;
 
+	@Value("${ybm.pulltopologyfromapi}")
+	private boolean pullTopologyFromApi;
+
+	@Autowired
+	private YBMCloudApiController ybmCloudApiController;
+
     @GetMapping("/api/ybserverinfo")
     public List<YBServerModel> getYBServerInfo(){
+		if(pullTopologyFromApi){
+			List<YBServerModel> list = ybmCloudApiController.getNodeListForTopology();
+			if(list != null && !list.isEmpty()){
+				return list;
+			}
+
+		}
     	return ybServerInfoDAO.getAll();
     }
 
