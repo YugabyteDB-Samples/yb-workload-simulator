@@ -53,7 +53,7 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
   missingNodes = [];
   
   @Input()
-  yugabyteOffering = 'Yugabyte MDB';
+  yugabyteOffering = 'Yugabyte DB';
 
   @ViewChild('network')
   network! : ElementRef;
@@ -81,6 +81,9 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
       this.createSvg();
       this.timer = setInterval(() => {
         this.ybServer.getServerNodes().subscribe(nodes => this.update(nodes));
+        if (this.yugabyteOffering === 'Yugabyte Managed') {
+          this.ybServer.getNodeList().subscribe(nodes => console.log(nodes));
+        }
       },this.graphRefreshMs);
     }, 1150);
   }

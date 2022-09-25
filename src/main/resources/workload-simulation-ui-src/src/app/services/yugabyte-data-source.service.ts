@@ -7,6 +7,7 @@ import { SystemPreferences } from '../model/system-preferences.model';
 import { WorkloadDesc } from '../model/workload-desc.model';
 import { WorkloadResult } from '../model/workload-result.model';
 import { YBServerModel } from '../model/yb-server-model.model';
+import { YbmNodeListResponseModel } from '../model/yugabyte-managed/node-list-response.model';
 
 const PROTOCOL = 'http';
 const PORT = 8080;
@@ -91,5 +92,9 @@ export class YugabyteDataSourceService {
     let nodeStr = nodeIds.join(',');
     let params = new HttpParams().set('nodenames', nodeStr);
     return this.http.get<String[]>(this.baseUrl+'api/ybm/stopnodes', {params : params});
+  }
+
+  getNodeList() : Observable<YbmNodeListResponseModel> {
+    return this.http.get<YbmNodeListResponseModel>(this.baseUrl+'api/ybm/nodes');
   }
 }
