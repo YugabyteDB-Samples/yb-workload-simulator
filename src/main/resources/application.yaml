@@ -46,3 +46,4 @@ ybm:
   project-id: ${ybm-project-id:NA}
   cluster-id: ${ybm-cluster-id:NA}
   baseuri: ${ybm-baseuri:https://cloud.yugabyte.com/api/public/v1/accounts}
+  pulltopologyfromapi: ${pulltopologyfromapi:false}
