@@ -14,7 +14,13 @@ public class YBServerModel {
     private String region;
     private String zone;
     private String inet_server;
-	public String getHost() {
+    
+    private boolean nodeUp = true;
+    private boolean master = false;
+    private boolean tserver = false;
+    private boolean readReplica = false;
+
+    public String getHost() {
 		return host;
 	}
 	public void setHost(String host) {
@@ -50,6 +56,28 @@ public class YBServerModel {
 	public void setInet_server(String inet_server) {
 		this.inet_server = inet_server;
 	}
-    
-    
+	public boolean isNodeUp() {
+		return nodeUp;
+	}
+	public void setNodeUp(boolean nodeUp) {
+		this.nodeUp = nodeUp;
+	}
+	public boolean isMaster() {
+		return master;
+	}
+	public void setMaster(boolean master) {
+		this.master = master;
+	}
+	public boolean isTserver() {
+		return tserver;
+	}
+	public void setTserver(boolean tserver) {
+		this.tserver = tserver;
+	}
+	public boolean isReadReplica() {
+		return readReplica;
+	}
+	public void setReadReplica(boolean readReplica) {
+		this.readReplica = readReplica;
+	}
 }

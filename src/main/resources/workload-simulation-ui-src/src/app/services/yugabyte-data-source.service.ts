@@ -27,12 +27,12 @@ export class YugabyteDataSourceService {
     }
   }
 
-  getServerNodes() :Observable<YBServerModel[]> {
+  getServerNodes(type : string ) :Observable<YBServerModel[]> {
     if (this.testEnv) {
-      return this.http.get<YBServerModel[]>(this.baseUrl + "api/ybserverinfo");
+      return this.http.get<YBServerModel[]>(this.baseUrl + "api/ybserverinfo/"+type);
     }
     else {
-      return this.http.get<YBServerModel[]>(this.baseUrl + "api/ybserverinfo");
+      return this.http.get<YBServerModel[]>(this.baseUrl + "api/ybserverinfo/"+type);
     }
   }
 
@@ -94,7 +94,16 @@ export class YugabyteDataSourceService {
     return this.http.get<String[]>(this.baseUrl+'api/ybm/stopnodes', {params : params});
   }
 
+  restartNodes() : Observable<String[]> {
+    return this.http.get<String[]>(this.baseUrl+'api/ybm/restartnodes');
+  }
+
   getNodeList() : Observable<YbmNodeListResponseModel> {
     return this.http.get<YbmNodeListResponseModel>(this.baseUrl+'api/ybm/nodes');
+  }
+
+  scaleCluster(nodes : number) : Observable<InvocationResult> {
+    let params = new HttpParams().set('numnodes', nodes);
+    return this.http.get<InvocationResult>(this.baseUrl+'api/ybm/scale', {params: params});
   }
 }

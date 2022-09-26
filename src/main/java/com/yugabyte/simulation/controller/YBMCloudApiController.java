@@ -1,12 +1,8 @@
 package com.yugabyte.simulation.controller;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.yugabyte.simulation.model.YBServerModel;
-import com.yugabyte.simulation.model.ybm.NodeInfo;
-import com.yugabyte.simulation.model.ybm.NodeInfoCloudInfo;
-import com.yugabyte.simulation.model.ybm.YbmNodeListResponseModel;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -16,10 +12,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.w3c.dom.Node;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.yugabyte.simulation.dao.InvocationResult;
+import com.yugabyte.simulation.model.YBServerModel;
+import com.yugabyte.simulation.model.ybm.NodeInfo;
+import com.yugabyte.simulation.model.ybm.NodeInfoCloudInfo;
+import com.yugabyte.simulation.model.ybm.YbmNodeListResponseModel;
 
 @RestController
 public class YBMCloudApiController {
@@ -255,7 +256,7 @@ public class YBMCloudApiController {
 
 
     @GetMapping("/api/ybm/scale")
-    public ResponseEntity<String> scaleCluster(@RequestParam(name = "accountid", required = false) String aAccountId
+    public InvocationResult scaleCluster(@RequestParam(name = "accountid", required = false) String aAccountId
             ,@RequestParam(name = "projectid", required = false) String aProjectId
             ,@RequestParam(name = "clusterid", required = false) String aClusterId
             ,@RequestParam(name = "numnodes", required = true) int numnodes){
@@ -313,11 +314,11 @@ public class YBMCloudApiController {
             System.out.println("responseFromCall:"+responseFromCall);
         }
         catch (Exception e){
+        	System.err.printf("Error scaling cluster, response was %s\n", e.getMessage());
             e.printStackTrace();
-            responseFromCall = "error:"+e.getMessage();
-            return new ResponseEntity<>(responseFromCall,HttpStatus.BAD_REQUEST);
+            return new InvocationResult(e);
         }
-        return new ResponseEntity<>(responseFromCall,HttpStatus.OK);
+        return new InvocationResult(responseFromCall);
     }
 
 
@@ -355,6 +356,10 @@ public class YBMCloudApiController {
                     ybServerModel.setHost(nodeName);
                     ybServerModel.setRegion(nodeInfoCloudInfo.region);
                     ybServerModel.setZone(nodeInfoCloudInfo.zone);
+                    ybServerModel.setNodeUp(node.is_node_up);
+                    ybServerModel.setMaster(node.is_master);
+                    ybServerModel.setTserver(node.is_tserver);
+                    ybServerModel.setReadReplica(node.is_read_replica);
                     result.add(ybServerModel);
                 } catch (Exception e) {
                     System.out.println("error:"+e.getMessage());

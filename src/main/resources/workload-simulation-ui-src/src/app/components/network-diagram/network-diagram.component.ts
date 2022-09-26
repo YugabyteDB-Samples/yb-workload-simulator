@@ -11,6 +11,10 @@ enum NodeType {
 interface NetworkNode extends SimulationNodeDatum {
   id: string;
   type: NodeType;
+  nodeUp? : boolean;
+  master? : boolean;
+  tserver?: boolean;
+  readReplica? : boolean;
 }
 
 interface NetworkLink extends SimulationLinkDatum<NetworkNode> {
@@ -41,16 +45,19 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
   private colorMap : any;
   private currentNodes  : NetworkNode[] = []; 
   private timer : any;
+  scaleClusterDialogVisible = false;
 
   private d3link : any = d3;
   status = "0 nodes selected";
-
+  newNodesCount = 0;
+  scaleClusterMessage = "";
   selectedItems : NetworkNode[] = []; // A set of the selected items with the id as the key
 
   graphNodes: NetworkNode[] = [];
   graphLinks: NetworkLink[] = [];
   nodeCount = 0;
-  missingNodes = [];
+  missingNodes : YBServerModel[] = [];
+  networkGraphRefreshInProgress = false;
   
   @Input()
   yugabyteOffering = 'Yugabyte DB';
@@ -59,7 +66,7 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
   network! : ElementRef;
 
   @Input()
-  graphRefreshMs = 1000;
+  graphRefreshMs = 60000;
 
   constructor(
     private ybServer : YugabyteDataSourceService,
@@ -72,6 +79,13 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
     console.log(this.d3link);
   }
 
+  private getYBVersion() : string {
+    switch (this.yugabyteOffering) {
+      case 'Yugabyte Anywhere': return 'YBA';
+      case 'Yugabyte Managed': return 'YBM';
+      default: return 'YBDB';
+    }
+  }
   ngAfterViewInit(){
     setTimeout( () =>  {
       this.width = this.network.nativeElement.offsetWidth;
@@ -79,12 +93,9 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
       console.log(this.width, this.height);
 
       this.createSvg();
-      this.timer = setInterval(() => {
-        this.ybServer.getServerNodes().subscribe(nodes => this.update(nodes));
-        if (this.yugabyteOffering === 'Yugabyte Managed') {
-          this.ybServer.getNodeList().subscribe(nodes => console.log(nodes));
-        }
-      },this.graphRefreshMs);
+      if (!this.timer) {
+        this.restartServerMonitor(this.graphRefreshMs);
+      }
     }, 1150);
   }
 
@@ -93,11 +104,20 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
       this.yugabyteOffering = changes.yugabyteOffering.currentValue;
     }
     if (changes.graphRefreshMs) {
-      clearInterval(this.timer);
-      this.timer = setInterval(() => {
-        this.ybServer.getServerNodes().subscribe(nodes => this.update(nodes));
-      },changes.graphRefreshMs.currentValue);
+      this.restartServerMonitor(changes.graphRefreshMs.currentValue);
     }
+  }
+  
+  private restartServerMonitor(refreshTime : number) {
+    if (this.timer) {
+      clearInterval(this.timer);
+    }
+    this.timer = setInterval(() => {
+      if (!this.networkGraphRefreshInProgress) {
+        this.networkGraphRefreshInProgress =  true;
+        this.ybServer.getServerNodes(this.getYBVersion()).subscribe(nodes => this.update(nodes));
+      }
+    },refreshTime);
   }
   
   private createSvg() : void {
@@ -119,9 +139,15 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
     let allNodes : NetworkNode[] = [];
     let allLinks : NetworkLink[] = [];
 
+    this.networkGraphRefreshInProgress = false;
     this.nodeCount = 0;
+    this.missingNodes = [];
     for (let i = 0; i < nodes.length; i++) {
       let thisNode = nodes[i];
+      if (!thisNode.nodeUp) {
+        this.missingNodes.push(thisNode);
+        continue;
+      }
       if (!regions.find(node => node.id == thisNode.region)) {
         let region = {id: thisNode.region, type: NodeType.REGION};
         // Add links from this region to the other regions
@@ -140,7 +166,14 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
         allLinks.push({source: thisNode.region, target: thisNode.zone, value: 3});
       }
 
-      allNodes.push({id: thisNode.host, type: NodeType.NODE});
+      allNodes.push({
+        id: thisNode.host, 
+        type: NodeType.NODE, 
+        nodeUp : thisNode.nodeUp, 
+        master : thisNode.master, 
+        tserver : thisNode.tserver, 
+        readReplica : thisNode.readReplica
+      });
       this.nodeCount++;
       allLinks.push({source: thisNode.zone, target: thisNode.host, value: 1});
     }
@@ -356,6 +389,10 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
     var computers = node.filter((d:NetworkNode) => {return d.type == NodeType.NODE})
         .append("path")
         .attr("class", "server")
+        .classed('tserver', (d:any) => d.tserver)
+        .classed('master', (d:any) => d.master)
+        .classed('readReplica', (d:any) => d.readReplica)
+        .classed('nodeDown', (d:any) => !d.nodeUp)
         .on("click", (d:any) => {this.click(d)})
         .attr("d", this.formComputerImage())
         .attr("stroke", "white")
@@ -402,6 +439,44 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
     }
   }
 
+  confirmRestartNodes() {
+    let nodeList = "";
+    for (let i = 0; i < this.missingNodes.length; i++) {
+      if (i > 0) {
+        nodeList += ', ';
+      }
+      nodeList += this.missingNodes[i].host;
+    }
+
+    let message = `Are you sure that you want to restart the ${this.missingNodes.length} down node(s)? (${nodeList}) `;
+    this.confirmService.confirm({
+      message: message,
+      header: 'Confirmation',
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        this.messageService.add({severity:'info', summary:'Request Sent', detail:'Requesting nodes to be restarted...', key: 'tc'});
+        this.ybServer.restartNodes().subscribe(result => {
+          console.log(result);
+          this.messageService.add({severity:'info', summary:'Success', detail:'Successfully requested nodes to be restarted', key: 'tc'});
+        }, 
+        error => {
+          console.log("error restarting nodes", error);
+          this.messageService.add({severity:'error', summary:'Error stopping node(s)', detail:'An error occurred submitting the request. The error returned was: ' + error, key: 'tc'});
+        }) ;
+      },
+      reject: () => {
+          // switch(type) {
+          //     case ConfirmEventType.REJECT:
+                  this.messageService.add({severity:'error', summary:'Caneled', detail:'Restarting nodes has been canceled.'});
+              // break;
+              // case ConfirmEventType.CANCEL:
+              //     this.messageService.add({severity:'warn', summary:'Cancelled', detail:'You have cancelled'});
+              // break;
+          // }
+      }
+    });
+  }
+
   confirmStopNodes() {
     let message = `Are you sure that you want to stop ${this.selectedItems.length} selected node`;
     message = message + (this.selectedItems.length == 1 ? '?' : 's?'); 
@@ -424,7 +499,7 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
       reject: () => {
           // switch(type) {
           //     case ConfirmEventType.REJECT:
-                  this.messageService.add({severity:'error', summary:'Rejected', detail:'You have rejected'});
+                  this.messageService.add({severity:'error', summary:'Canceled', detail:'Stopping nodes was canceled.'});
               // break;
               // case ConfirmEventType.CANCEL:
               //     this.messageService.add({severity:'warn', summary:'Cancelled', detail:'You have cancelled'});
@@ -432,5 +507,30 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
           // }
       }
     });
+  }
+
+  showCloseIcon = false;
+
+  scaleCluster() {
+    this.newNodesCount = this.nodeCount;
+    this.scaleClusterDialogVisible = true;
+  }
+
+  closeScaleClusterDialog() {
+    this.scaleClusterDialogVisible = false;
+  }
+
+  applyScaleClusterDialog() {
+    this.showCloseIcon = false;
+    this.scaleClusterMessage = "Submitting request to scale cluster...";
+    this.ybServer.scaleCluster(this.newNodesCount).subscribe(result => {
+      if (result.result != 0) {
+        this.scaleClusterMessage = "Error trying to scale cluster: " + result.data;
+      }
+      else {
+        this.scaleClusterMessage = "Cluster scaling initiated successfully!"
+        this.showCloseIcon = true;
+      }
+    })
   }
 }

@@ -71,7 +71,6 @@ export class StatisticsGraphComponent implements OnInit, AfterViewInit, OnChange
   }
 
   ngOnInit(): void {
-    this.ybServer.getServerNodes().subscribe(node => console.log(node));
   }
 
   ngAfterViewInit(){

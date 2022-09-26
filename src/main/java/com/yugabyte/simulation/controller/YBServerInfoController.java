@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,8 +21,6 @@ import com.yugabyte.simulation.services.TimerService;
 public class YBServerInfoController {
     @Autowired
     private YBServerInfoDAO ybServerInfoDAO;
-    @Autowired
-    private TimerService timerService;
 
 	@Value("${ybm.pulltopologyfromapi}")
 	private boolean pullTopologyFromApi;
@@ -39,6 +38,24 @@ public class YBServerInfoController {
 
 		}
     	return ybServerInfoDAO.getAll();
+    }
+
+    @GetMapping("/api/ybserverinfo/{target}")
+    public List<YBServerModel> getYBServerInfo(@PathVariable(name = "target", required =  true) String target){
+    	switch (target) {
+    	case "YBA":
+			// TODO: Code this case
+    	case "YBM":
+			List<YBServerModel> list = ybmCloudApiController.getNodeListForTopology();
+			if(list != null && !list.isEmpty()){
+				return list;
+			}
+			else {
+		    	return ybServerInfoDAO.getAll();
+			}
+		default:
+	    	return ybServerInfoDAO.getAll();
+    	}
     }
 
     private volatile boolean hasNode6 = true;

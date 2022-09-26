@@ -5,4 +5,8 @@ export interface YBServerModel {
     region : string;
     zone: string;
     inetServer : string;
+    nodeUp : boolean;
+    master : boolean;
+    tserver: boolean;
+    readReplica : boolean;
 }
