@@ -136,9 +136,17 @@ figure {
 }
 
 .server.master {
-	fill: green;
+	fill: #333;
 }
 
 .server.selected {
     fill: blue !important;
+}
+
+.server .master-label {
+	display: none;
+}
+
+.server.master .master-label {
+	display: block;
 }

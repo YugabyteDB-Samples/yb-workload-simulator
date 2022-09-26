@@ -115,7 +115,7 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
     this.timer = setInterval(() => {
       if (!this.networkGraphRefreshInProgress) {
         this.networkGraphRefreshInProgress =  true;
-        this.ybServer.getServerNodes(this.getYBVersion()).subscribe(nodes => this.update(nodes));
+        this.ybServer.getServerNodes(this.getYBVersion()).subscribe(nodes => this.update(nodes), error => this.networkGraphRefreshInProgress = false);
       }
     },refreshTime);
   }
@@ -182,6 +182,19 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
     if (this.currentNodes.length != this.graphNodes.length && this.rootElement) {
       this.updateGraph();
       this.currentNodes = this.graphNodes;
+    }
+    else {
+      // Update the flogs on the nodes like master, tserver, etc.
+      for (let i = 0; i < this.graphNodes.length; i++) {
+        let thisNode = this.graphNodes[i];
+        if (thisNode.type === NodeType.NODE) {
+          d3.selectAll('.server').filter(d => (d as NetworkNode).id == thisNode.id)
+            .classed("master", thisNode.master? thisNode.master : false)
+            .classed("tserver", thisNode.tserver? thisNode.tserver : false)
+            .classed("readReplica", thisNode.readReplica? thisNode.readReplica : false)
+        }
+      }
+
     }
   }
 
@@ -315,10 +328,14 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
   }
 
   formComputerImage() : any {
-    let yOffset = -40;
-    let width = 80;
-    let height = 26;
-    let cornerRadius = 8;
+    let height = 22;
+    let yOffset = -height/2;
+    let width = 60;
+    let cornerRadius = 6;
+    let radius = 5;
+    let numLines = 5;
+    let lineSpacing = 6;
+
     let path = d3.path();
     path.moveTo(-width/2, yOffset+cornerRadius);
     path.arc(-width/2+cornerRadius, yOffset+cornerRadius, cornerRadius, Math.PI, Math.PI*3/2, false);
@@ -332,12 +349,11 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
 
     let centerX = -width/2 + width/5;
     let centerY = yOffset + height/2; 
-    let radius = 8;
     path.moveTo( centerX+ radius, centerY);
     path.arc(centerX, centerY, radius, 0, Math.PI, false);
     path.arc(centerX, centerY, radius, Math.PI, 2*Math.PI, false);
-    for (let i = 0; i < 5; i++) {
-      let xLoc = width/2 - 8*(i+1);
+    for (let i = 0; i < numLines; i++) {
+      let xLoc = width/2 - lineSpacing*(i+1);
       path.moveTo(xLoc, yOffset + height *0.2);
       path.lineTo(xLoc, yOffset + height *0.8);
     }
@@ -349,6 +365,8 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
     if (!this.rootElement) {
       return;
     }
+    this.deselectAll();
+
     this.rootElement.selectAll('g').remove();
     this.colorMap = d3.scaleOrdinal(d3.schemeCategory10);
 
@@ -386,17 +404,26 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
           (node as any).fy = null;
         }));
 
-    var computers = node.filter((d:NetworkNode) => {return d.type == NodeType.NODE})
-        .append("path")
-        .attr("class", "server")
-        .classed('tserver', (d:any) => d.tserver)
-        .classed('master', (d:any) => d.master)
-        .classed('readReplica', (d:any) => d.readReplica)
-        .classed('nodeDown', (d:any) => !d.nodeUp)
-        .on("click", (d:any) => {this.click(d)})
-        .attr("d", this.formComputerImage())
-        .attr("stroke", "white")
-        .attr("stroke-width", 3)
+        var computers = node.filter((d:NetworkNode) => {return d.type == NodeType.NODE})
+          .append("g")
+          .attr("class", "server")
+          .classed('tserver', (d:any) => d.tserver)
+          .classed('master', (d:any) => d.master)
+          .classed('readReplica', (d:any) => d.readReplica)
+          .classed('nodeDown', (d:any) => !d.nodeUp)
+          .on("click", (d:any) => {this.click(d)});
+        computers.append("path")
+          .attr("d", this.formComputerImage())
+          .attr("stroke", "white")
+          .attr("stroke-width", 3);
+        computers.append("text")
+          .attr('class', 'master-label')
+          .text("Master")
+          .attr("dy", -15)
+          .attr('fill', 'white')
+          .attr('font-size', 'small')
+          .attr('text-anchor', 'middle');
+
 
     var circles = node.filter((d:NetworkNode) => {return d.type != NodeType.NODE})
       .append("circle")
@@ -407,6 +434,7 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
     
     var labels = node.append("text")
       .text(function(d: { id: any; }) { return d.id;})
+      .attr('dy', (d:NetworkNode) => d.type == NodeType.NODE ? 22 : 0)
       .attr('fill', 'white')
       .attr('font-size', (d: NetworkNode) => { return this.nodeFontSize(d);})
       .attr('text-anchor', 'middle');
@@ -461,18 +489,24 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
         }, 
         error => {
           console.log("error restarting nodes", error);
-          this.messageService.add({severity:'error', summary:'Error stopping node(s)', detail:'An error occurred submitting the request. The error returned was: ' + error, key: 'tc'});
+          let errorMessage = "";
+          for (let i = 0; i < error.error.length; i++) {
+            let thisMessage : string = error.error[i];
+            if (thisMessage.startsWith('error:')) {
+              let newMessage = thisMessage.substring('error:'.length);
+              errorMessage += "Error stopping node " + this.missingNodes[i] + ": " + newMessage + ". ";
+            }
+          }
+          this.messageService.add({
+            sticky: true, 
+            severity:'error', 
+            summary:'Error restarting node(s)', 
+            detail:'An error occurred submitting the request. The error returned was: ' + errorMessage, 
+            key: 'tc'});
         }) ;
       },
       reject: () => {
-          // switch(type) {
-          //     case ConfirmEventType.REJECT:
-                  this.messageService.add({severity:'error', summary:'Caneled', detail:'Restarting nodes has been canceled.'});
-              // break;
-              // case ConfirmEventType.CANCEL:
-              //     this.messageService.add({severity:'warn', summary:'Cancelled', detail:'You have cancelled'});
-              // break;
-          // }
+        this.messageService.add({severity:'error', summary:'Caneled', detail:'Restarting nodes has been canceled.'});
       }
     });
   }
@@ -493,18 +527,24 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
         }, 
         error => {
           console.log("error stopping nodes " + nodeIds, error);
-          this.messageService.add({severity:'error', summary:'Error stopping node(s)', detail:'An error occurred submitting the request. The error returned was: ' + error, key: 'tc'});
+          let errorMessage = "";
+          for (let i = 0; i < error.error.length; i++) {
+            let thisMessage : string = error.error[i];
+            if (thisMessage.startsWith('error:')) {
+              let newMessage = thisMessage.substring('error:'.length);
+              errorMessage += "Error stopping node " + nodeIds[i] + ": " + newMessage + ". ";
+            }
+          }
+          this.messageService.add({
+            sticky: true, 
+            severity:'error', 
+            summary:'Error stopping node(s)', 
+            detail:'An error occurred submitting the request. The error returned was: ' + errorMessage, 
+            key: 'tc'});
         }) ;
       },
       reject: () => {
-          // switch(type) {
-          //     case ConfirmEventType.REJECT:
-                  this.messageService.add({severity:'error', summary:'Canceled', detail:'Stopping nodes was canceled.'});
-              // break;
-              // case ConfirmEventType.CANCEL:
-              //     this.messageService.add({severity:'warn', summary:'Cancelled', detail:'You have cancelled'});
-              // break;
-          // }
+        this.messageService.add({severity:'error', summary:'Canceled', detail:'Stopping nodes was canceled.'});
       }
     });
   }
