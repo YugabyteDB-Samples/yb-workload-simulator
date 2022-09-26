@@ -35,6 +35,15 @@ java -DXmx=16g -Dmax-pool-size=10 -Dnode=<database-ip-or-name> -Ddbuser=<db-user
 -Dsslrootcert=<certificatepath> 
 ```
 
+#### Parameters for Yugabyte Cloud - These will provide the ability to start/stop nodes and scaler cluster from App UI:
+
+```
+-Dybm-account-id=<YBM Account Id>
+-Dybm-api-key=<YBM API Key>
+-Dybm-project-id=<YBM Project Id>
+-Dybm-cluster-id=<YBM Cluster Id>
+```
+
 #### Additional parameters if you wish to run YCQL workload
 ```
 -Dworkload=genericCassandraWorkload
