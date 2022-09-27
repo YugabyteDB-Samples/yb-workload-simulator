@@ -12,7 +12,7 @@ sudo ifconfig lo0 alias 127.0.0.3
 ```
 Go into the Yugabyte directory to start a 3 node cluster locally with the following command 
 ```
-./bin/yb-ctl --rf 3 create. 
+./bin/yb-ctl --rf 3 create 
 ```
 To verify that Yugabyte is up and running you can run the command
 ```
