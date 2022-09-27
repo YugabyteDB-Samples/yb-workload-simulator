@@ -64,6 +64,7 @@ Now go back to your terminal and within the Yugabyte folder (the same place wher
 As you can see there is a slight drop when the node is stopped and then it just keeps going!
   
 ![image](https://user-images.githubusercontent.com/78859174/192046016-54f475fb-9237-41bc-a85a-5ea8036409ea.png)
+
 Note: The Stop node button is still in Beta at the time of this documentation. 
   
 
@@ -73,7 +74,11 @@ This is a walk through of how to get the Demo Up in a YBA (Yugabyte Anywhere UI)
 
 The first thing that is needed is for you to complete the steps above in order to create the “jar” file. After that there will be a “yb-simu-base-app.jar” file in the “target” directory of the “yb-simulation-base-demo-app-main” folder 
 
-Lets go over some prerequisites: You need everything above including Java, Maven, and Yugabyte installed on your local machine. 
+Lets go over some prerequisites: You need everything above including Java, Maven, and Yugabyte installed on your local machine. It should be noted that if this is your first time using the AWS pem file you need to change the permistions of the .pem file with the following command:
+  
+```
+chmod 400 <name of your .pem file>
+```
 
 You should have Yugabyte “stopped” on your local machine. If you followed the steps about you should restart node 2 by typing 
 ```
@@ -138,7 +143,7 @@ EXAMPLE
  ```
 You can also use this code to specify the AWS regions:
 ```  
-java -DXmx=16g -Dmax-pool-size=10 -Dnode=<your node IP> -Ddbuser=yugabyte -Ddbpassword=<Your password> -Dspring.datasource.hikari.data-source-properties.topologyKeys=<Your AWS credentials> Example:aws.us-east-1.us-east-1a,aws.us-east-1.us-east-1b,aws.us-east-1.us-east-1c -Dspring.workload=genericWorkload -DadditionalEndpoints= -jar yb-simu-base-app.jar
+java -DXmx=16g -Dmax-pool-size=10 -Dnode=<your node IP> -Ddbuser=yugabyte -Ddbpassword=<Your password> -Dspring.datasource.hikari.data-source-properties.topologyKeys=<Your AWS regions/zones> Example:aws.us-east-1.us-east-1a,aws.us-east-1.us-east-1b,aws.us-east-1.us-east-1c -Dspring.workload=genericWorkload -DadditionalEndpoints= -jar yb-simu-base-app.jar
 ```
   
 The second way to do this is to make an executable script with the command above in case you wish to rerun the command. To do that you can copy and paste the code into a .sh file here is an example: ```touch run.sh``` then make the file executable by typing ```chmod 700 run.sh.``` Then you can execute it by typing ```./run.sh```
