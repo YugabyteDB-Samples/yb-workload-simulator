@@ -163,7 +163,7 @@ java -DXmx=16g -Dmax-pool-size=10 -Dnode=<database-ip-or-name> -Ddbuser=<db-user
   
 To try other work loads you can replace the genericWorkload from -Dworkload= line with any other workload from this section src>>main>java>com>yugabyte>simulation>service https://github.com/yugabyte/workload-simulation-demo-app/tree/main/src/main/java/com/yugabyte/simulation/service
 
-#### Additional parameters if you wish to run YCQL workload
+#### Additional parameters if you wish to run YCQL workload (Please remember to move the <-jar yb-simu-base-app.jar> to the last line fo the script. Everything after that line gets ignored)
 ```
 -Dworkload=genericCassandraWorkload
 -Dspring.data.cassandra.contact-points=<host ip> 
