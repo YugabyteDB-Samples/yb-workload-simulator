@@ -187,7 +187,7 @@ public class YBMCloudApiController {
                         .bodyToMono(String.class)
                         .block();
             } catch (Exception e) {
-                responseFromCall = "error:"+e.getMessage();
+                responseFromCall = "{ \"error\": \"+e.getMessage()+\"}";
                 errorEncountered = true;
             }
             response.add(responseFromCall);
@@ -244,7 +244,7 @@ public class YBMCloudApiController {
 
             }
             catch(Exception e){
-                responseFromCall = "error:"+e.getMessage();
+                responseFromCall = "{ \"error\": \"+e.getMessage()+\"}";
                 errorEncountered = true;
             }
             listOfResponses.add(responseFromCall);
