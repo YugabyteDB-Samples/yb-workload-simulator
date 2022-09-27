@@ -80,7 +80,7 @@ Lets go over some prerequisites: You need everything above including Java, Maven
 chmod 400 <name of your .pem file>
 ```
 
-You should have Yugabyte “stopped” on your local machine. If you followed the steps about you should restart node 2 by typing 
+You should have Yugabyte “stopped” on your local machine. If you followed the steps above you should restart node 2 by typing 
 ```
 ./bin/yb-ctl start_node 2
 ```
