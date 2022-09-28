@@ -35,7 +35,7 @@ java -DXmx=16g -Dmax-pool-size=10 -Dnode=<database-ip-or-name> -Ddbuser=<db-user
 -Dsslrootcert=<certificatepath> 
 ```
 
-#### Parameters for Yugabyte Cloud - These will provide the ability to start/stop nodes and scaler cluster from App UI:
+#### Parameters for Yugabyte Cloud - These will provide the ability to start/stop nodes and scale cluster from App UI:
 
 ```
 -Dybm-account-id=<YBM Account Id>
@@ -64,4 +64,4 @@ java -DXmx=16g -Dmax-pool-size=10 -Dnode=<database-ip-or-name> -Ddbuser=<db-user
 http://<HOSTNAME>:8080
 ```
 ![Screenshot](docs/image1.png)
-![Screenshot](docs/image2.png)
+![Screenshot](docs/image2-new.png)
