@@ -93,8 +93,7 @@ export class StatisticsGraphComponent implements OnInit, AfterViewInit, OnChange
   }
 
   ngAfterViewInit(){
-
-    let interval = this.timingMetricName === 'Aggregation Counter' ? 0 : 0;
+    let interval = this.timingMetricName === 'Aggregate' ? 1200 : 0;
     setTimeout( () => {
       this.width = this.throughput.nativeElement.offsetWidth;
       this.height = this.throughput.nativeElement.offsetHeight;
