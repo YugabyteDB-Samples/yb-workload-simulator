@@ -6,17 +6,17 @@
         <div class="col-4 d-inline-block pt-0">
             <p-button label="Scale Cluster" icon="fa-solid fa-up-down" badge="{{nodeCount}}" 
             class="p-button-sm p-button-secondary" styleClass="p-button-secondary" [style]="{'width' : '100%'}" 
-            badgeClass="p-button-secondary" (click)="scaleCluster()"></p-button>
+            badgeClass="p-button-secondary" (onClick)="scaleCluster()"></p-button>
         </div>
         <div class="col-4 d-inline-block pt-0">
             <p-button label="Stop Selected Nodes" icon="fa-solid fa-stop" badge="{{selectedItems.length}}" 
             [disabled]="selectedItems.length == 0" class="p-button-sm p-button-secondary" styleClass="p-button-secondary" [style]="{'width' : '100%'}" 
-            badgeClass="p-button-secondary" (click)="confirmStopNodes()"></p-button>
+            badgeClass="p-button-secondary" (onClick)="confirmStopNodes()"></p-button>
         </div>
         <div class="col-4 d-inline-block pt-0">
             <p-button label="Restart Missing Nodes" icon="fa-solid fa-play" badge="{{missingNodes.length}}" 
             [disabled]="missingNodes.length == 0" class="p-button-sm p-button-secondary" styleClass="p-button-secondary" [style]="{'width' : '100%'}" 
-            badgeClass="p-button-secondary" (click)="confirmRestartNodes()"></p-button>
+            badgeClass="p-button-secondary" (onClick)="confirmRestartNodes()"></p-button>
         </div>
     </div>
 </div>
@@ -32,9 +32,9 @@
     </p>
     <span style="color: lightblue; font-size: small;">{{scaleClusterMessage}}</span>
     <ng-template pTemplate="footer">
-        <p-button *ngIf="!showCloseIcon" icon="pi pi-check" (click)="applyScaleClusterDialog()" label="Ok"></p-button>
-        <p-button *ngIf="!showCloseIcon" icon="pi pi-times" (click)="closeScaleClusterDialog()" label="Cancel"></p-button>
-        <p-button *ngIf="showCloseIcon" icon="pi pi-check" (click)="closeScaleClusterDialog()" label="Close"></p-button>
+        <p-button *ngIf="!showCloseIcon" icon="pi pi-check" (onClick)="applyScaleClusterDialog()" label="Ok"></p-button>
+        <p-button *ngIf="!showCloseIcon" icon="pi pi-times" (onClick)="closeScaleClusterDialog()" label="Cancel"></p-button>
+        <p-button *ngIf="showCloseIcon" icon="pi pi-check" (onClick)="closeScaleClusterDialog()" label="Close"></p-button>
     </ng-template>
     
 </p-dialog>

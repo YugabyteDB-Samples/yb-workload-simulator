@@ -1,8 +1,10 @@
-import { AfterViewInit, Component, ElementRef, Input, OnChanges, OnInit, ViewChild, SimpleChanges } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, OnChanges, OnInit, ViewChild, SimpleChanges, NgZone, OnDestroy } from '@angular/core';
 import * as d3 from 'd3';
 import { YugabyteDataSourceService } from 'src/app/services/yugabyte-data-source.service';
 import { TimingData } from '../../model/timing-data.model';
 import { TimingPoint } from '../../model/timing-point.model';
+
+declare var ResizeObserver : any;
 
 enum LineType { MIN = 0, AVG = 1, MAX = 2 };
 @Component({
@@ -10,7 +12,7 @@ enum LineType { MIN = 0, AVG = 1, MAX = 2 };
   templateUrl: './statistics-graph.component.html',
   styleUrls: ['./statistics-graph.component.css']
 })
-export class StatisticsGraphComponent implements OnInit, AfterViewInit, OnChanges {
+export class StatisticsGraphComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy {
   private data : TimingPoint[] = [];
   private svg : any;
   private margin = 50;
@@ -64,17 +66,35 @@ export class StatisticsGraphComponent implements OnInit, AfterViewInit, OnChange
   @Input()
   timingMetricName = "Workload";
 
+  obs : any;
 
   constructor(
+    private host : ElementRef,
+    private zone : NgZone,
     private ybServer : YugabyteDataSourceService
   ) { 
   }
 
   ngOnInit(): void {
+    this.obs = new ResizeObserver((entries : any) => {
+      this.zone.run(() => {
+        console.log(entries)
+        for (let entry of entries) {
+          const cr = entry.contentRect;
+          console.log(`Element size: ${cr.width}px x ${cr.height}px`)
+        }
+      })
+    });
+    this.obs.observe(this.host.nativeElement);
+  }
+
+  ngOnDestroy(): void {
+    this.obs.unobserve(this.host.nativeElement);
   }
 
   ngAfterViewInit(){
-    let interval = this.timingMetricName === 'Aggregation Counter' ? 1200 : 0;
+
+    let interval = this.timingMetricName === 'Aggregation Counter' ? 0 : 0;
     setTimeout( () => {
       this.width = this.throughput.nativeElement.offsetWidth;
       this.height = this.throughput.nativeElement.offsetHeight;

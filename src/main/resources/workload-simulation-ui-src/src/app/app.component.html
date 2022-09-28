@@ -27,12 +27,12 @@
   <div class="mt-2">
     <p-panel header="Network Diagram and Aggregate Statistics" [toggleable]="true" [collapsed]="false">
       <div class="grid">
-        <div class="col" style="height: 600px;">
+        <div class="col-6" style="height: 600px;">
           <div style = "width: 100%; height: 100%; background-color: black;">
             <app-network-diagram [graphRefreshMs]="systemPreferences.graphRefreshMs" [yugabyteOffering]="ybOption"></app-network-diagram>
           </div>
         </div>
-        <div class="col" style="height: 600px;">
+        <div class="col-6" style="height: 600px;">
           <div style = "width: 100%; height: 100%; background-color: black;">
             <div style="width: 100%; height: 50%">
               <app-statistics-graph style="width: 100%" [idName]="'aggregateLatency'" [timingData]="currentData[AGGREGATION_WORKLOAD].results" [duration]="duration" [timingType]="'LATENCY'" [timingMetric]="'Aggregation Counter'" [timingMetricName]="'Aggregate'"></app-statistics-graph> 

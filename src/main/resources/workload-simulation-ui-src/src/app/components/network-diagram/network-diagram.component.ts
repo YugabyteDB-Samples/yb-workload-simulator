@@ -233,7 +233,7 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
 
 
   private selectedNodesChanged() {
-    console.log("Selection Changed", this.selectedItems);
+    // console.log("Selection Changed", this.selectedItems);
   }
 
   private getServerChildrenOrSelf(node : NetworkNode) : NetworkNode[] {
@@ -553,6 +553,7 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
 
   scaleCluster() {
     this.newNodesCount = this.nodeCount;
+    this.showCloseIcon = false;
     this.scaleClusterDialogVisible = true;
   }
 
