@@ -327,17 +327,18 @@ export class StatisticsGraphComponent implements OnInit, AfterViewInit, OnChange
       .attr('transform', `translate(${this.margins.left})`)
       .call(this.yAxis);
 
+    let rand = Math.floor(100000 * Math.random());
     var clip = this.svg.append("defs").append("svg:clipPath")
-      .attr("id", "clip")
+      .attr("id", "clip"+rand)
       .append("svg:rect")
-      .attr("id", "clip-rect")
+      .attr("id", "clip-rect"+rand)
       .attr("x", this.margins.left+1)
       .attr("y", this.margins.top)
       .attr("width", this.width-this.margins.left - this.margins.right+1)
       .attr("height", this.height - this.margins.top - this.margins.bottom);
 						
     var visCont = this.svg.append('g')
-            .attr("clip-path", "url(#clip)")
+            .attr("clip-path", "url(#clip" + rand + ")")
             .attr('class', 'vis');
 
     this.$data = visCont.append('path').attr('class', 'line data');
