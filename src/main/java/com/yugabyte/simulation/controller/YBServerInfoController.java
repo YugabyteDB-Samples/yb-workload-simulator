@@ -45,6 +45,7 @@ public class YBServerInfoController {
     	switch (target) {
     	case "YBA":
 			// TODO: Code this case
+			return ybServerInfoDAO.getAll();
     	case "YBM":
 			List<YBServerModel> list = ybmCloudApiController.getNodeListForTopology();
 			if(list != null && !list.isEmpty()){
