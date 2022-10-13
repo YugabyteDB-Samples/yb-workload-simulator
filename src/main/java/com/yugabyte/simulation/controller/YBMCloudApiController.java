@@ -184,7 +184,7 @@ public class YBMCloudApiController {
         // We will start the stopped nodes now.
         for(String nodeName: stoppedNodes){
             StringBuilder sbUriToStartNodes = new StringBuilder(baseUri);
-            sbUriToStartNodes.append("/").append(aAccountId).append("/projects/").append(aProjectId).append("/clusters/").append(aClusterId).append("/nodes/op");
+            sbUriToStartNodes.append("/").append(aAccountId).append("/projects/").append(aProjectId).append("/clusters/").append(aClusterId).append("/node-ops");
             String body = "{\n" +
                     "  \"action\": \"START\",\n" +
                     "  \"node_name\": \""+nodeName+"\"\n" +
@@ -202,7 +202,7 @@ public class YBMCloudApiController {
                         .bodyToMono(String.class)
                         .block();
             } catch (Exception e) {
-                responseFromCall = "{ \"error\": \"+e.getMessage()+\"}";
+                responseFromCall = "{ \"error\": \""+e.getMessage()+"\"}";
                 errorEncountered = true;
             }
             response.add(responseFromCall);
@@ -234,7 +234,7 @@ public class YBMCloudApiController {
         List<String> listOfResponses = new ArrayList<>();
         // Lets first find the list of stopped nodes.
         StringBuilder sbUri = new StringBuilder(baseUri);
-        sbUri.append("/").append(aAccountId).append("/projects/").append(aProjectId).append("/clusters/").append(aClusterId).append("/nodes/op");
+        sbUri.append("/").append(aAccountId).append("/projects/").append(aProjectId).append("/clusters/").append(aClusterId).append("/node-ops");
 
         boolean errorEncountered = false;
 
@@ -259,7 +259,8 @@ public class YBMCloudApiController {
 
             }
             catch(Exception e){
-                responseFromCall = "{ \"error\": \"+e.getMessage()+\"}";
+                e.printStackTrace();
+                responseFromCall = "{ \"error\": \""+e.getMessage()+"\"}";
                 errorEncountered = true;
             }
             listOfResponses.add(responseFromCall);
