@@ -58,6 +58,7 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
   nodeCount = 0;
   missingNodes : YBServerModel[] = [];
   networkGraphRefreshInProgress = false;
+  resetGraphOnNextCall = false;
   
   @Input()
   yugabyteOffering = 'Yugabyte DB';
@@ -102,6 +103,7 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.yugabyteOffering) {
       this.yugabyteOffering = changes.yugabyteOffering.currentValue;
+      this.resetGraphOnNextCall = true;
     }
     if (changes.graphRefreshMs) {
       this.restartServerMonitor(changes.graphRefreshMs.currentValue);
@@ -114,7 +116,15 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
     }
     this.timer = setInterval(() => {
       if (!this.networkGraphRefreshInProgress) {
-        this.networkGraphRefreshInProgress =  true;
+        this.networkGraphRefreshInProgress = true;
+        if (this.resetGraphOnNextCall) {
+          // Remove the nodes from the network graph to get the latest version in the right format.
+          console.log("resetting graph")
+          this.graphLinks = [];
+          this.graphNodes = [];
+          this.currentNodes = [];
+          this.resetGraphOnNextCall = false;
+        }
         this.ybServer.getServerNodes(this.getYBVersion()).subscribe(nodes => this.update(nodes), error => this.networkGraphRefreshInProgress = false);
       }
     },refreshTime);

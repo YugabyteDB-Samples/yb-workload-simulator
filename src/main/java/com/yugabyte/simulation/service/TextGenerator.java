@@ -509,12 +509,31 @@ public class TextGenerator {
 	
 	public static final int NUM_WORDS = words.length;
 	
+	/**
+	 * Form a pseudo English sentence whose length is between minLength and
+	 * max length, both inclusive.
+	 * @param minLength - the shortest string to return (inclusive)
+	 * @param maxLength - the longest string to retun (inclusive)
+	 * @return
+	 */
 	public static String getText(int minLength, int maxLength) {
 		StringBuffer sb = new StringBuffer(maxLength);
 		Random random = ThreadLocalRandom.current();
-		int desiredLength = minLength + random.nextInt(maxLength - minLength);
+		int desiredLength = minLength + random.nextInt(maxLength - minLength+1);
+		int count = 0;
 		while (sb.length() < desiredLength) {
-			sb.append(words[random.nextInt(NUM_WORDS)]).append(' ');
+			String nextWord = words[random.nextInt(NUM_WORDS)];
+			int length = (nextWord.length() + (count > 0 ? 1 : 0));
+			if (sb.length() + length <= maxLength) {
+				if (count++ > 0) {
+					sb.append(' ');
+				}
+				sb.append(nextWord);
+			}
+			else {
+				// This word didn't fit, exit loop
+				break;
+			}
 		}
 		return sb.toString();
 	}

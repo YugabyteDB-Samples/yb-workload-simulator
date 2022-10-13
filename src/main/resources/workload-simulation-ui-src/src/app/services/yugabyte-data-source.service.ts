@@ -1,12 +1,14 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { BooleanInvocationResult } from '../model/boolean-invocation-result.model';
 import { InvocationResult } from '../model/invocation-result.model';
 import { ParamValue } from '../model/param-value.model';
 import { SystemPreferences } from '../model/system-preferences.model';
 import { WorkloadDesc } from '../model/workload-desc.model';
 import { WorkloadResult } from '../model/workload-result.model';
 import { YBServerModel } from '../model/yb-server-model.model';
+import { Configuration } from '../model/yugabyte-managed/configuration.model';
 import { YbmNodeListResponseModel } from '../model/yugabyte-managed/node-list-response.model';
 
 const PROTOCOL = 'http';
@@ -106,4 +108,25 @@ export class YugabyteDataSourceService {
     let params = new HttpParams().set('numnodes', nodes);
     return this.http.get<InvocationResult>(this.baseUrl+'api/ybm/scale', {params: params});
   }
+
+  isExistingUser() : Observable<BooleanInvocationResult> { 
+    return this.http.get<BooleanInvocationResult>(this.baseUrl+'user/existingUser');
+  }
+
+  validatePassword(password : string) : Observable<BooleanInvocationResult> {
+    return this.http.post<BooleanInvocationResult>(this.baseUrl+'user/validatePassword', password);
+  }
+
+  setInitialPassword(password : string) : Observable<BooleanInvocationResult> {
+    return this.http.post<BooleanInvocationResult>(this.baseUrl+'user/setInitialPassword', password);
+  }
+
+  getConfiguration():Observable<Configuration> {
+    return this.http.get<Configuration>(this.baseUrl+'user/getConfiguration');
+  }
+
+  saveConfiguration(config : Configuration):Observable<InvocationResult> {
+    return this.http.post<InvocationResult>(this.baseUrl+'user/saveConfiguration', config);
+  }
+
 }

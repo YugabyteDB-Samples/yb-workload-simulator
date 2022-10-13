@@ -16,12 +16,13 @@ public class YBServerInfoDAOImpl implements YBServerInfoDAO{
 
     @Override
     public List<YBServerModel> getAll() {
-        String query = "with yb_servers as (\n" +
-                "       select host,port,cloud,region,zone from yb_servers()\n" +
-                "   ), my_connection as (\n" +
-                "      select host(inet_server_addr()) host, inet_server_port() port\n" +
-                "      ,'<<- you are here' as inet_server)\n" +
-                " select * from yb_servers natural left join my_connection;";
+//        String query = "with yb_servers as (\n" +
+//                "       select host,port,cloud,region,zone from yb_servers()\n" +
+//                "   ), my_connection as (\n" +
+//                "      select host(inet_server_addr()) host, inet_server_port() port\n" +
+//                "      ,'<<- you are here' as inet_server)\n" +
+//                " select * from yb_servers natural left join my_connection;";
+    	String query = "select host,port,cloud,region,zone from yb_servers()";
         return jdbcTemplate.query(query, new BeanPropertyRowMapper<YBServerModel>(YBServerModel.class));
     }
 }

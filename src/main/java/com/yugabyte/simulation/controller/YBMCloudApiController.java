@@ -11,16 +11,21 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.yugabyte.simulation.dao.Configuration;
 import com.yugabyte.simulation.dao.InvocationResult;
 import com.yugabyte.simulation.model.YBServerModel;
 import com.yugabyte.simulation.model.ybm.NodeInfo;
 import com.yugabyte.simulation.model.ybm.NodeInfoCloudInfo;
 import com.yugabyte.simulation.model.ybm.YbmNodeListResponseModel;
+import com.yugabyte.simulation.services.ConfigurationService;
+
+import reactor.core.publisher.Mono;
 
 @RestController
 public class YBMCloudApiController {
@@ -42,12 +47,22 @@ public class YBMCloudApiController {
     @Autowired
     private WebClient.Builder webClientBuilder;
 
+    public void setConfiguration(Configuration configuration) {
+    	if (configuration.getAccessKey().indexOf(ConfigurationService.MASK) < 0) {
+    		this.apiKey = configuration.getAccessKey();
+    	}
+    	this.accountId = configuration.getAccountId();
+    	this.projectId = configuration.getProjectId();
+    	this.clusterId = configuration.getClusterId();
+    }
+    
     @GetMapping("/api/ybm/nodes")
     public ResponseEntity<YbmNodeListResponseModel> getListOfNodesApi(@RequestParam(name = "accountid", required = false) String aAccountId
             , @RequestParam(name = "projectid", required = false) String aProjectId
             , @RequestParam(name = "clusterid", required = false) String aClusterId
             ){
 
+    	System.out.println("Starting call to nodes.");
         // If the accountid, projectid and clusterid are not coming as part of the request, we will use the one provided by java params or yaml file
         if(aAccountId == null){
             aAccountId = accountId;
@@ -321,12 +336,13 @@ public class YBMCloudApiController {
         return new InvocationResult(responseFromCall);
     }
 
-
     public YbmNodeListResponseModel getNodeList(String accountId, String projectId, String clusterId){
         StringBuilder sbUri = new StringBuilder(baseUri);
         sbUri.append("/").append(accountId).append("/projects/").append(projectId).append("/clusters/").append(clusterId).append("/nodes");
         YbmNodeListResponseModel model = null;
         try {
+        	System.out.println("getting nodes");
+        	long now = System.nanoTime();
             model = webClientBuilder.build()
                     .get()
                     .uri(sbUri.toString())
@@ -334,6 +350,7 @@ public class YBMCloudApiController {
                     .retrieve()
                     .bodyToMono(YbmNodeListResponseModel.class)
                     .block();
+            System.out.printf("nodes retrieved in %,.03fms\n", (System.nanoTime()-now)/1000000.0);
         } catch (Exception e) {
             System.out.println("error:"+e.getMessage());
         }
