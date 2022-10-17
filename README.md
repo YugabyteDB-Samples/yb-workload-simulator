@@ -50,6 +50,9 @@ Go to the root of the project and run:
 This will create the jar file: <yb-simulation-base-demo-app>/target/yb-simulation-base-app.jar
 You can verify the name of the "jar" file by going to the target directory, use the name of that file where ever you see "yb-simulation-base-app.jar"
 
+![image](https://user-images.githubusercontent.com/78859174/196288218-13d499ee-a401-4b25-b95c-6e42c64a9824.png)
+
+
 Now you can go to http://localhost:8080 and you will see this
 
 ![image](https://user-images.githubusercontent.com/78859174/192045736-8cbb6ae0-9bd5-4fc6-ae0d-c2830192b669.png)
