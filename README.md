@@ -45,7 +45,7 @@ Download the zip file
 ### How to build the App
 Go to the root of the project and run:
 ```
-/mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
 ```
 This will create the jar file: <yb-simulation-base-demo-app>/target/yb-simulation-base-app.jar
 
