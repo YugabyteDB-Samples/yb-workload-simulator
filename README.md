@@ -48,7 +48,11 @@ Go to the root of the project and run:
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
 ```
 This will create the jar file: <yb-simulation-base-demo-app>/target/yb-simulation-base-app.jar
-You can verify the name of the "jar" file by going to the target directory, use the name of that file where ever you see "yb-simulation-base-app.jar"
+You can also get the jar file in VS Code by right clicking the "WorkloadSimulationApplication.java" file and selecting Run Java
+  
+![image](https://user-images.githubusercontent.com/78859174/196289685-74854a5a-1cb5-4b50-81b9-08534bab9a25.png)
+
+Then you can verify the name of the "jar" file by going to the target directory, use the name of that file where ever you see "yb-simulation-base-app.jar"
 
 ![image](https://user-images.githubusercontent.com/78859174/196288218-13d499ee-a401-4b25-b95c-6e42c64a9824.png)
 
