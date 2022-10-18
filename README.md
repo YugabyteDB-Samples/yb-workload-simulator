@@ -227,7 +227,7 @@ This will create a new "jar" file in your target directory.
 
 ![image](https://user-images.githubusercontent.com/78859174/196457412-60f5adc1-aec1-4a14-b8ea-f63fd64a7acb.png)
 
-You shoukld now be able to run the code with the following command(code from line 136 above): 
+You should now be able to run the code with the following command(code from line 136 above): 
   
 ![image](https://user-images.githubusercontent.com/78859174/196458425-88c0951f-c17e-41bb-98ec-d1fba7983128.png)
   
