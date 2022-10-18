@@ -192,3 +192,48 @@ http://<HOSTNAME>:8080
 ```
 ![Screenshot](docs/image1.png)
 ![Screenshot](docs/image2.png)
+
+  
+  
+  
+## Create your own workload .java file
+You can copy and paste the "GenericWorkload.java" file into a new file, name of your choosing (The development team behind this app would like consistancy in the naming so please add Workload" to the tail of your name). My demo is named "InstructionsWorkload.java". 
+
+![image](https://user-images.githubusercontent.com/78859174/196455986-2a4df344-26dc-4fbc-a153-e3b66a71cb6e.png)
+
+  
+There are 3 "FIX ME" sections to change the name of the class after you copy and paste the "GenericWorkload.java" file. 
+  
+![image](https://user-images.githubusercontent.com/78859174/196456157-fd832363-496b-4b25-ba38-1d9826013517.png)
+
+![image](https://user-images.githubusercontent.com/78859174/196456219-19325cf8-5ac7-400f-830f-ff1ba155b8b5.png)
+
+![image](https://user-images.githubusercontent.com/78859174/196456330-4d10f7cd-8931-4f19-b664-5a58b702cbe0.png)
+  
+To be able to call the new workload you have to modify the "WorkloadConfig.java" file found here:
+src/main/java/com/yugabyte/simulation/config
+
+![image](https://user-images.githubusercontent.com/78859174/196456659-71160757-e5f5-44fc-9b0a-c87897e27292.png)
+  
+![image](https://user-images.githubusercontent.com/78859174/196456775-84b931c4-fccf-4abc-aaeb-d3541ad8327d.png)
+
+ After this you can run the "WorkloadSimulationApplication.java" as a java file:
+ 
+![image](https://user-images.githubusercontent.com/78859174/196457069-5f47b875-51a2-48cc-ae48-cf8991cc93ea.png)
+
+![image](https://user-images.githubusercontent.com/78859174/196457185-dfe2ee07-f1ba-4abf-9f59-718fdeb024df.png)
+
+This will create a new "jar" file in your target directory.
+
+![image](https://user-images.githubusercontent.com/78859174/196457412-60f5adc1-aec1-4a14-b8ea-f63fd64a7acb.png)
+
+You shoukld now be able to run the code with the following command(code from line 136 above): 
+  
+![image](https://user-images.githubusercontent.com/78859174/196458425-88c0951f-c17e-41bb-98ec-d1fba7983128.png)
+  
+Navigate to localhost:8080 and you will see:
+  
+![image](https://user-images.githubusercontent.com/78859174/196458637-30acf3d6-7fed-49f1-a64e-f38447acc975.png)
+
+
+
