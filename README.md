@@ -39,7 +39,7 @@ mvn -v
 ![image](https://user-images.githubusercontent.com/78859174/192044014-ff113c98-24db-4b5a-aa0e-e12373f72cf6.png)
 
 
-## Code setup and Installation
+## How to build your own workload
 Download the zip file
 
 ### How to build the App
@@ -74,7 +74,16 @@ As you can see there is a slight drop when the node is stopped and then it just 
 ![image](https://user-images.githubusercontent.com/78859174/192046016-54f475fb-9237-41bc-a85a-5ea8036409ea.png)
 
 Note: The Stop node button is still in Beta at the time of this documentation. 
+
+You should have Yugabyte “stopped” on your local machine. If you followed the steps above you should restart node 2 by typing 
+```
+./bin/yb-ctl start_node 2
+```
   
+Next we need to stop the cluster: 
+```
+./bin/yb-ctl stop
+```
 
 ## YBA Demo
 ### How to run this App
@@ -88,17 +97,11 @@ Lets go over some prerequisites: You need everything above including Java, Maven
 chmod 400 <name of your .pem file>
 ```
 
-You should have Yugabyte “stopped” on your local machine. If you followed the steps above you should restart node 2 by typing 
-```
-./bin/yb-ctl start_node 2
-```
+
 ![image](https://user-images.githubusercontent.com/78859174/192046522-6ca91219-e137-456f-b6cf-ba800fc11a61.png)
 
-  
-Next we need to stop the cluster: 
-```
-./bin/yb-ctl stop
-```
+ 
+
 ![image](https://user-images.githubusercontent.com/78859174/192046645-8d7926a8-4304-4ff2-9b49-605400d3ae45.png)
  
 To successfully follow along with this demo please make sure you have an YBA set up in AWS. If you need help with that please follow these instructions: 
