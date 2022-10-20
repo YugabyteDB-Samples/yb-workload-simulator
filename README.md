@@ -290,7 +290,7 @@ You should now be able to run the code with the following command(code from line
   
 ![image](https://user-images.githubusercontent.com/78859174/196458425-88c0951f-c17e-41bb-98ec-d1fba7983128.png)
   
-Navigate to localhost:8080 and you will see:
+Navigate to localhost:8080 and you will see or the IP of the machine you are using:
   
 ![image](https://user-images.githubusercontent.com/78859174/196458637-30acf3d6-7fed-49f1-a64e-f38447acc975.png)
 
