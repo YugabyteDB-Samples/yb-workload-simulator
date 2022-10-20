@@ -85,7 +85,7 @@ Next we need to stop the cluster:
 ./bin/yb-ctl stop
 ```
 
-## YBA Demo
+## How to setup YBA Environment
 ### How to run this App
 This is a walk through of how to get the Demo Up in a YBA (Yugabyte Anywhere UI) environment in AWS. Here is a link to the repo: https://github.com/yugabyte/yb-simulation-base-demo-app
 
