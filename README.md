@@ -74,10 +74,12 @@ To verify that Yugabyte is up and running you can run the command
 ```
 ./bin/yb-ctl status
 ```
-Please have Java installed on your local machine. Here is a link to help with that process. 
+Please have Java installed on your local machine. Here is a link to help with that process. Second link if you do not have an Oracle account 
 
 https://www.youtube.com/watch?v=FsX0_RXMwvY
 
+
+https://dev.to/docker/how-to-setup-java-on-macos-124-monterey-3l10
 
 ![image](https://user-images.githubusercontent.com/78859174/192043252-88b9578d-7e79-49cd-bae6-486c8df1bf0c.png)
 
