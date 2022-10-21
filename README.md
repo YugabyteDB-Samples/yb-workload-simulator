@@ -132,18 +132,19 @@ Then execute the commands below in the terminal or navigate to your tmp director
  
 EXAMPLE  
   
-![image](https://user-images.githubusercontent.com/78859174/192047573-ce34a4ca-7e0d-4918-b8dd-14fec9b309a3.png)
+<img width="960" alt="image" src="https://user-images.githubusercontent.com/78859174/197268105-a93db697-61f9-4cc0-adeb-c5c46c0c6781.png">
   
  Code
  ```
- java -DXmx=32g -Dspring.datasource.hikari.maximumPoolSize=100 -DloggingDir="/tmp/logs"\
--Dnode=<Your Node IP address>\
+ java -DXmx=32g -Dspring.datasource.hikari.maximumPoolSize=100\
+-Dspring.datasource.hikari.data-source-properties.serverName = <A node from your YBA>\
+-DloggingDir="/tmp/logs"\
+-Dnode=<A node from your YBA Same as above>\
 -Ddbuser=<Your username> Default:yugabyte \
 -Ddbpassword=<Your password> Default:yugabyte \
 -Dport=5433 \
 -Dmax-pool-size=100 \
 -Ddbname=yugabyte \
--Dspring.profiles.active=application.yaml \
 -Dserver.port=8080 \
 -DidCounter=1 \
 -Dssl=false <unless you enabled it> \
