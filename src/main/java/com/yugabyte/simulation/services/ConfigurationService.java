@@ -83,7 +83,7 @@ public class ConfigurationService {
 	}
 
 	private Configuration decryptConfiguration(Configuration configuration, boolean maskSecrets) {
-		if (password == null || configuration.getAccessKey() == null || configuration.getAccessKey().isBlank()) {
+		if (password == null || configuration.getAccessKey() == null || configuration.getAccessKey().trim().equals("")) {
 			return configuration;
 		}
 

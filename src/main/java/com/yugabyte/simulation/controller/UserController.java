@@ -1,5 +1,6 @@
 package com.yugabyte.simulation.controller;
 
+import com.yugabyte.simulation.model.YBServerModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -13,6 +14,8 @@ import com.yugabyte.simulation.dao.Configuration;
 import com.yugabyte.simulation.dao.InvocationResult;
 import com.yugabyte.simulation.exception.InvalidPasswordException;
 import com.yugabyte.simulation.services.ConfigurationService;
+
+import java.util.List;
 
 @RestController
 @CrossOrigin(origins="*")
@@ -112,10 +115,20 @@ public class UserController {
 	@RequestMapping(value = "/saveConfiguration", method = RequestMethod.POST)
 	public InvocationResult saveConfiguration(@RequestBody Configuration config) {
 		try {
+
+
+
 			configService.saveConfiguration(config);
 			if (config.getManagementType().equals("Yugabyte Managed")) {
 				Configuration decryptedConfig = configService.getConfiguration(false);
 				ybmController.setConfiguration(decryptedConfig);
+
+				List<YBServerModel> list = ybmController.getNodeListForTopology();
+
+				if(list == null || list.isEmpty()){
+					throw new Exception("Unable to get the Cluster Info with provided inputs. Please check the inputs and try saving again.");
+				}
+
 			}
 			return new InvocationResult("Ok");
 		}
