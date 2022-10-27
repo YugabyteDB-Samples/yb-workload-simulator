@@ -54,10 +54,7 @@ java -DXmx=16g -Dmax-pool-size=10 -Dnode=<database-ip-or-name> -Ddbuser=<db-user
 -Dspring.data.cassandra.password=<cassandra-password>
 ```
 
-## What is yb-simulation-base-demo-app
-This is our base app containing some generic workloads. You can create/drop tables for a workload, load data, run different simulations all from UI. Web page provides you with live latency and throughput about your yugabyte db cluster while these simulations are running. This repo acts as a base and you can extend it to write your specific simulations. I will be providing some starter projects/instructions for that soon. 
-
-##How to run locally
+## How to run locally
 Here are the steps to get the demo application to run on your local machine, starting with Yugabyte.
 Have Yugabyte installed on your local machine: https://docs.yugabyte.com/preview/quick-start/.
 Open a total of 3 IP addresses to be able to run Yugabyte with a replication factor of 3
