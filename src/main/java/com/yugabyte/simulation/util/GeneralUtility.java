@@ -35,12 +35,16 @@ public class GeneralUtility {
     }
 
     public static String getRandomJSONString(){
+        return getRandomJSONString(60);
+    }
+
+    public static String getRandomJSONString(int numberOfFields){
         JSONObject obj = new JSONObject();
         obj.put("name",randomString(15));
         obj.put("address",randomString(20));
         obj.put("taxinfo",randomString(30));
         obj.put("taxowed",randomIntegerVal(0,1000));
-        for(int i = 0; i < 60; i++){
+        for(int i = 0; i < numberOfFields; i++){
             obj.put("field_"+i, randomIntegerVal());
         }
         return obj.toString();
