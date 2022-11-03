@@ -54,6 +54,7 @@ public class YBServerInfoController {
 		    	return ybServerInfoDAO.getAll();
 			}
 		default:
+//			return getYBServerInfoSample();
 	    	return ybServerInfoDAO.getAll();
     	}
     }

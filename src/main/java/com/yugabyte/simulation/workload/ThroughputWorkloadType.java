@@ -1,6 +1,7 @@
 package com.yugabyte.simulation.workload;
 
 import java.lang.reflect.InvocationTargetException;
+import java.sql.SQLException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
@@ -11,6 +12,10 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.NonTransientDataAccessException;
+import org.springframework.dao.TransientDataAccessException;
+import org.springframework.jdbc.BadSqlGrammarException;
 
 import com.yugabyte.simulation.dao.ParamValue;
 import com.yugabyte.simulation.dao.TimerResult;
@@ -19,7 +24,6 @@ import com.yugabyte.simulation.services.ExecutionStatus;
 import com.yugabyte.simulation.services.ServiceManager;
 import com.yugabyte.simulation.services.Timer;
 import com.yugabyte.simulation.services.TimerService;
-import com.yugabyte.simulation.workload.FixedTargetWorkloadType.FixedTargetWorkloadInstance;
 
 public class ThroughputWorkloadType extends WorkloadType {
 	
@@ -266,21 +270,66 @@ public class ThroughputWorkloadType extends WorkloadType {
 				this.initializationHandler.invoke(customData, threadData);
 			}
 			try {
-				long lastError = 0;
-				int skippedErrors = 0;
 				sleep(ThreadLocalRandom.current().nextInt(threadDelay.get()));
 				while (!terminate.get()) {
 					timer.start();
+					int retriesCounter = 0;
+					int backOff = 0;
 					long timeInNs;
-					try {
-						task.run(customData, threadData);
-						timeInNs = timer.end(ExecutionStatus.SUCCESS,this.workloadOrdinal);
-					}
-					catch (Exception e) {
-						timeInNs = timer.end(ExecutionStatus.ERROR, this.workloadOrdinal);
-						instance.handleException(e);
-					}
+					boolean breakOuter = false;
+					do {
+						try {
+							task.run(customData, threadData);
+							timeInNs = timer.end(ExecutionStatus.SUCCESS,this.workloadOrdinal);
+						}
+						catch (BadSqlGrammarException badSqlException) {
+							timeInNs = timer.end(ExecutionStatus.ERROR, this.workloadOrdinal);
+							// This is an error which cannot be recovered so break out.
+							System.err.printf("Invalid SQL statement \"%s\". The error was %s\n", 
+									badSqlException.getSql(), badSqlException.getMessage());
+							badSqlException.printStackTrace();
+							breakOuter = true;
+							break;
+						}
+						catch (NonTransientDataAccessException ntdae) {
+							timeInNs = timer.end(ExecutionStatus.ERROR, this.workloadOrdinal);
+							System.err.printf("Non transient data exception caught. Type: %s, message: %s\n",
+									ntdae.getClass(), ntdae.getMessage());
+							ntdae.printStackTrace();
+							breakOuter = true;
+							break;
+						}
+						catch (TransientDataAccessException tdae) {
+							timeInNs = timer.end(ExecutionStatus.ERROR, this.workloadOrdinal);
+							System.err.printf("Transient data exception caught. Type: %s, message: %s\n",
+									tdae.getClass(), tdae.getMessage());
+							if (++retriesCounter <= MAX_RETRIES) {
+								if (backOff == 0) {
+									backOff = 10;
+								}
+								else {
+									backOff *= 2;
+								}
+								sleep(backOff);
+							}
+							else {
+								retriesCounter = 0;
+								instance.handleException(tdae);
+							}
+						}
+						catch (DataAccessException dae) {
+							timeInNs = timer.end(ExecutionStatus.ERROR, this.workloadOrdinal);
+							instance.handleException(dae);
+						}
+						catch (Exception e) {
+							timeInNs = timer.end(ExecutionStatus.ERROR, this.workloadOrdinal);
+							instance.handleException(e);
+						}
+					} while (retriesCounter > 0);
 					this.transactionCounter.incrementAndGet();
+					if (breakOuter) {
+						break;
+					}
 					int idleTime = threadDelay.get() - (int)(timeInNs / 1000000);
 					if (idleTime > 0) {
 						this.idleTimeCounter.addAndGet(idleTime);
@@ -295,7 +344,7 @@ public class ThroughputWorkloadType extends WorkloadType {
 			}
 		}
 	}
-	
+	public static final int MAX_RETRIES = 6;
 	public class ThroughputWorkloadInstance extends WorkloadTypeInstance {
 		private final ExecutorService executor = Executors.newCachedThreadPool();
 		private Object customData = null;
