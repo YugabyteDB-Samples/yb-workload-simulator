@@ -93,6 +93,15 @@ mvn -v
 ```
 ![image](https://user-images.githubusercontent.com/78859174/192044014-ff113c98-24db-4b5a-aa0e-e12373f72cf6.png)
 
+Here is an **example invocation** using the defaults from `yb-ctl`:
+
+```bash
+java -DXmx=16g -Dmax-pool-size=10 -Dnode=localhost -Ddbuser=yugabyte -Ddbpassword=yugabyte \
+    -Dspring.datasource.hikari.data-source-properties.topologyKeys=cloud1.datacenter1.rack1 \
+    -Dspring.workload=genericWorkload -jar target/yb-simu-base-app.jar
+```
+
+The GUI is visible at http://localhost:8080
 
 ## How to build your own workload
 Download the zip file
@@ -289,7 +298,7 @@ You should now be able to run the code with the following command(code from line
   
 ![image](https://user-images.githubusercontent.com/78859174/196458425-88c0951f-c17e-41bb-98ec-d1fba7983128.png)
   
-Navigate to localhost:8080 and you will see or the IP of the machine you are using:
+Navigate to http://localhost:8080 and you will see or the IP of the machine you are using:
   
 ![image](https://user-images.githubusercontent.com/78859174/196458637-30acf3d6-7fed-49f1-a64e-f38447acc975.png)
 
