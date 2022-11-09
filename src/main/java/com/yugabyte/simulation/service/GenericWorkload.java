@@ -154,7 +154,7 @@ public class GenericWorkload extends WorkloadSimulationBase implements WorkloadS
                     return new InvocationResult("Ok");
 
                 case RUN_SIMULATION:
-                    this.runSimulation(values[0].getIntValue(), values[1].getIntValue(), values[2].getBoolValue());
+                    this.runSimulation(values);
                     return new InvocationResult("Ok");
 
 
@@ -220,8 +220,12 @@ public class GenericWorkload extends WorkloadSimulationBase implements WorkloadS
     }
 
 
-    private void runSimulation(int tps, int maxThreads, boolean runInserts) {
-        System.out.println("**** Preloading data...");
+    private void runSimulation(ParamValue[] values) {
+    	int tps = values[0].getIntValue();
+    	int maxThreads = values[1].getIntValue();
+    	boolean runInserts = values[2].getBoolValue();
+
+    		System.out.println("**** Preloading data...");
         final List<UUID> uuids = getQueryList();
         System.out.println("**** Preloading complete...");
 
@@ -229,7 +233,7 @@ public class GenericWorkload extends WorkloadSimulationBase implements WorkloadS
         jdbcTemplate.setFetchSize(1000);
 
         runInstanceType
-                .createInstance(serviceManager)
+                .createInstance(serviceManager, this.runningWorkload, values)
                 .setMaxThreads(maxThreads)
                 .execute(tps, (customData, threadData) -> {
                     UUID id = uuids.get(random.nextInt(uuids.size()));
