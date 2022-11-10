@@ -208,7 +208,7 @@ public class GenericWorkload extends WorkloadSimulationBase implements WorkloadS
         List<UUID> results = new ArrayList<UUID>(ROWS_TO_PRELOAD);
         jdbcTemplate.setMaxRows(ROWS_TO_PRELOAD);
         jdbcTemplate.setFetchSize(ROWS_TO_PRELOAD);
-        jdbcTemplate.query("select pkid from generic1 limit " + ROWS_TO_PRELOAD,
+        jdbcTemplate.query("select pkid, yb_hash_code(pkid) from generic1 where yb_hash_code(pkid) % 7 = 0 limit " + ROWS_TO_PRELOAD,
                 new RowCallbackHandler() {
                     @Override
                     public void processRow(ResultSet rs) throws SQLException {
