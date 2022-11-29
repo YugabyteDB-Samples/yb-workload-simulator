@@ -16,3 +16,8 @@
       </div>
     </div>
 </div>
+<div style="background-color: lightcyan;">
+  <div>
+      <p-knob [(ngModel)]="desiredValue" textColor="black" [max]="3*3600" [step]="60" [midX]="700" [size]="200" valueTemplate="{{formatTime(desiredValue)}}">{{desiredValue}}</p-knob>
+  </div>
+</div>  

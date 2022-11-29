@@ -28,6 +28,7 @@ import { FormsModule } from '@angular/forms';
 import { TableModule } from 'primeng/table';
 import { TabViewModule } from 'primeng/tabview';
 import { ToastModule } from 'primeng/toast';
+import {  KnobModule } from 'primeng/knob';
 
 import { WorkloadService } from './services/workload-service.service';
 import { StepsDiagramComponent } from './components/steps-diagram/steps-diagram.component';
@@ -64,6 +65,7 @@ import { ConfigurationComponent } from './components/configuration/configuration
     InputSwitchModule,
     InputTextareaModule,
     InputTextModule,
+    KnobModule,
     MenuModule,
     PanelModule,
     PasswordModule,
