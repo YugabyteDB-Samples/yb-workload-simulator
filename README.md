@@ -66,49 +66,59 @@ These will provide the ability to start/stop nodes and scale cluster from App UI
 
 Here are the steps to get the demo application to run on your local machine, starting with Yugabyte.
 
-1. Have Yugabyte installed on your local machine: https://docs.yugabyte.com/preview/quick-start/.
+1. Have Yugabyte installed on your local machine: <https://docs.yugabyte.com/preview/quick-start/>.
 
 1. Open a total of 3 IP addresses to be able to run Yugabyte with a replication factor of 3, using this command:
 
-  ```sh
-  sudo ifconfig lo0 alias 127.0.0.2
-  sudo ifconfig lo0 alias 127.0.0.3
-  ```
+    ```sh
+    sudo ifconfig lo0 alias 127.0.0.2
+    sudo ifconfig lo0 alias 127.0.0.3
+    ```
 
 1. Go into the Yugabyte directory to start a 3 node cluster locally with the following command
 
-  ```sh
-  ./bin/yb-ctl --rf 3 create
-  ```
+    ```sh
+    ./bin/yb-ctl --rf 3 create
+    ```
 
 1. To verify that Yugabyte is up and running you can run the command
 
-  ```sh
-  ./bin/yb-ctl status
-  ```
+    ```sh
+    ./bin/yb-ctl status
+    ```
 
 1. Please have Java installed on your local machine. Here is a link to help with that process. Second link if you do not have an Oracle account:
 
-  * <https://www.youtube.com/watch?v=FsX0_RXMwvY>
-  * <https://dev.to/docker/how-to-setup-java-on-macos-124-monterey-3l10>
+    * <https://www.youtube.com/watch?v=FsX0_RXMwvY>
+    * <https://dev.to/docker/how-to-setup-java-on-macos-124-monterey-3l10>
 
-  ![image](https://user-images.githubusercontent.com/78859174/192043252-88b9578d-7e79-49cd-bae6-486c8df1bf0c.png)
+    ![image](https://user-images.githubusercontent.com/78859174/192043252-88b9578d-7e79-49cd-bae6-486c8df1bf0c.png)
 
 1. To verify you have Java installed please run this command:
 
-  ```sh
-  java -version
-  ```
+    ```sh
+    java -version
+    ```
 
 1. For this demo we also need to install Maven, here is a link we have found helpful to install Maven on a Mac M1 computer: <https://www.youtube.com/watch?v=kCQKh_CscYA>
 
-1. To confirm you have successfully install Maven on your Mac please use the command
+1. To confirm you have successfully installed Maven on your Mac please use this command:
 
-  ```sh
-  mvn -v
-  ```
+    ```sh
+    mvn -v
+    ```
 
-  ![image](https://user-images.githubusercontent.com/78859174/192044014-ff113c98-24db-4b5a-aa0e-e12373f72cf6.png)
+    ![image](https://user-images.githubusercontent.com/78859174/192044014-ff113c98-24db-4b5a-aa0e-e12373f72cf6.png)
+
+1. Here is an **example invocation** using the defaults from `yb-ctl`:
+
+    ```sh
+    java -DXmx=16g -Dmax-pool-size=10 -Dnode=localhost -Ddbuser=yugabyte -Ddbpassword=yugabyte \
+        -Dspring.datasource.hikari.data-source-properties.topologyKeys=cloud1.datacenter1.rack1 \
+        -Dspring.workload=genericWorkload -jar target/yb-simu-base-app.jar
+    ```
+
+    The GUI is visible at <http://localhost:8080>
 
 ## How to build your own workload
 
@@ -317,6 +327,6 @@ You should now be able to run the code with the following command(code from line
 
 ![image](https://user-images.githubusercontent.com/78859174/196458425-88c0951f-c17e-41bb-98ec-d1fba7983128.png)
 
-Navigate to localhost:8080 and you will see or the IP of the machine you are using:
+Navigate to <http://localhost:8080> and you will see the IP address of the machine you are using:
 
 ![image](https://user-images.githubusercontent.com/78859174/196458637-30acf3d6-7fed-49f1-a64e-f38447acc975.png)
