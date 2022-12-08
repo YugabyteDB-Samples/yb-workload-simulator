@@ -1,6 +1,6 @@
 ## What is yb-simulation-base-demo-app
 
-This is our base app containing some generic workloads. You can create/drop tables for a workload, load data, run different simulations all from UI. Web page provides you with live latency and throughput about your yugabyte db cluster while these simulations are running. This repo acts as a base and you can extend it to write your specific simulations. I will be providing some starter projects/instructions for that soon.
+This is our base app containing some generic workloads. You can create/drop tables for a workload, load data, run different simulations all from UI. Web page provides you with live latency and throughput about your YugabyteDB cluster while these simulations are running. This repo acts as a base and you can extend it to write your specific simulations. We will be providing some starter projects/instructions for that soon.
 
 ## Code setup and Installation
 
@@ -64,24 +64,24 @@ These will provide the ability to start/stop nodes and scale cluster from App UI
 
 ## How to run locally
 
-Here are the steps to get the demo application to run on your local machine, starting with Yugabyte.
+Here are the steps to get the demo application to run on your local machine, starting with YugabyteDB.
 
-1. Have Yugabyte installed on your local machine: <https://docs.yugabyte.com/preview/quick-start/>.
+1. Have YugabyteDB installed on your local machine: <https://docs.yugabyte.com/preview/quick-start/>.
 
-1. Open a total of 3 IP addresses to be able to run Yugabyte with a replication factor of 3, using this command:
+1. Open a total of 3 IP addresses to be able to run YugabyteDB with a replication factor of 3, using this command:
 
     ```sh
     sudo ifconfig lo0 alias 127.0.0.2
     sudo ifconfig lo0 alias 127.0.0.3
     ```
 
-1. Go into the Yugabyte directory to start a 3 node cluster locally with the following command
+1. Go into the YugabyteDB directory to start a 3 node cluster locally with the following command
 
     ```sh
     ./bin/yb-ctl --rf 3 create
     ```
 
-1. To verify that Yugabyte is up and running you can run the command
+1. To verify that YugabyteDB is up and running you can run the command
 
     ```sh
     ./bin/yb-ctl status
@@ -148,7 +148,7 @@ Now you can go to <http://localhost:8080> and you will see this
 
 From here you can select the “hamburger” menu at the top and simulate your own workload!
 
-Now go back to your terminal and within the Yugabyte folder (the same place where you started the node cluster). And you can stop a node by executing the following command
+Now go back to your terminal and within the YugabyteDB folder (the same place where you started the node cluster). And you can stop a node by executing the following command
 
 ```sh
 ./bin/yb-ctl stop_node 2
@@ -162,7 +162,7 @@ As you can see there is a slight drop when the node is stopped and then it just 
 
 Note: The Stop node button is still in Beta at the time of this documentation.
 
-You should have Yugabyte "stopped" on your local machine. If you followed the steps above you should restart node 2 by typing:
+You should have YugabyteDB "stopped" on your local machine. If you followed the steps above you should restart node 2 by typing:
 
 ```sh
 ./bin/yb-ctl start_node 2
@@ -178,18 +178,17 @@ Next we need to stop the cluster:
 
 ### How to run this App
 
-This is a walk through of how to get the Demo up in a YBA (Yugabyte Anywhere UI) environment in AWS.
+This is a walk through of how to get the Demo up in a YBA (YugabyteDB Anywhere UI) environment in AWS.
 
 The first thing that is needed is for you to complete the steps above in order to create the JAR file. After that there will be a `yb-simu-base-app.jar` file in the “target” directory of the “yb-simulation-base-demo-app-main” folder
 
-Lets go over some prerequisites: You need everything above including Java, Maven, and Yugabyte installed on your local machine. It should be noted that if this is your first time using the AWS pem file you need to change the permistions of the .pem file with the following command:
+Lets go over some prerequisites: You need everything above including Java, Maven, and YugabyteDB installed on your local machine. It should be noted that if this is your first time using the AWS pem file you need to change the permistions of the .pem file with the following command:
 
 ```sh
 chmod 400 <name of your .pem file>
 ```
 
 ![image](https://user-images.githubusercontent.com/78859174/192046522-6ca91219-e137-456f-b6cf-ba800fc11a61.png)
-
 
 ![image](https://user-images.githubusercontent.com/78859174/192046645-8d7926a8-4304-4ff2-9b49-605400d3ae45.png)
 
@@ -228,7 +227,7 @@ EXAMPLE
 Code
 
 ```sh
- java -DXmx=32g -Dspring.datasource.hikari.maximumPoolSize=100 -DloggingDir="/tmp/logs"\
+java -DXmx=32g -Dspring.datasource.hikari.maximumPoolSize=100 -DloggingDir="/tmp/logs"\
 -Dnode=<Your Node IP address>\
 -Ddbuser=<Your username> Default:yugabyte \
 -Ddbpassword=<Your password> Default:yugabyte \
@@ -265,7 +264,7 @@ To try other work loads you can replace the genericWorkload from -Dworkload= lin
 
 #### Additional parameters if you wish to run YCQL workload
 
-(Please remember to move the jar yb-simu-base-app.jar to the last line of the script. Everything after that line gets ignored.)
+(Please remember to move the `-jar yb-simu-base-app.jar` to the last line of the script. Everything after that line gets ignored.)
 
 ```sh
 -Dworkload=genericCassandraWorkload
@@ -294,7 +293,7 @@ http://<HOSTNAME>:8080
 
 ## Create your own workload .java file
 
-You can copy and paste the "GenericWorkload.java" file into a new file, name of your choosing (The development team behind this app would like consistency in the naming so please add Workload" to the tail of your name). My demo is named "InstructionsWorkload.java".
+You can copy and paste the `GenericWorkload.java` file into a new file, name of your choosing (The development team behind this app would like consistency in the naming so please add `Workload` to the tail of your name). The demo in this example is named "InstructionsWorkload.java".
 
 ![image](https://user-images.githubusercontent.com/78859174/196455986-2a4df344-26dc-4fbc-a153-e3b66a71cb6e.png)
 
@@ -306,8 +305,7 @@ There are 3 "FIX ME" sections to change the name of the class after you copy and
 
 ![image](https://user-images.githubusercontent.com/78859174/196456330-4d10f7cd-8931-4f19-b664-5a58b702cbe0.png)
 
-To be able to call the new workload you have to modify the "WorkloadConfig.java" file found here:
-src/main/java/com/yugabyte/simulation/config
+To be able to call the new workload you have to modify the `WorkloadConfig.java` file found in [src/main/java/com/yugabyte/simulation/config/](src/main/java/com/yugabyte/simulation/config/).
 
 ![image](https://user-images.githubusercontent.com/78859174/196456659-71160757-e5f5-44fc-9b0a-c87897e27292.png)
 
@@ -323,7 +321,7 @@ This will create a new "jar" file in your target directory.
 
 ![image](https://user-images.githubusercontent.com/78859174/196457412-60f5adc1-aec1-4a14-b8ea-f63fd64a7acb.png)
 
-You should now be able to run the code with the following command(code from line 136 above):
+You should now be able to run the code with the following command (code from line 136 above):
 
 ![image](https://user-images.githubusercontent.com/78859174/196458425-88c0951f-c17e-41bb-98ec-d1fba7983128.png)
 
