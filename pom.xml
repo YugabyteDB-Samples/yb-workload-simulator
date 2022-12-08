@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.yugabyte</groupId>
-	<artifactId>workload-simulation-demo-app</artifactId>
+	<artifactId>yb-workload-simulator</artifactId>
 	<version>0.0.2</version>
-	<name>workload-simulation-demo-app</name>
-	<description>Workload Simulation Demo App</description>
+	<name>yb-workload-simulator</name>
+	<description>YugabyteDB Workload Simulation Demo App</description>
 	<properties>
 		<java.version>19</java.version>
 	</properties>
@@ -91,7 +91,7 @@
 	</dependencies>
 
 	<build>
-		<finalName>yb-simu-base-app</finalName>
+		<finalName>yb-workload-sim</finalName>
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>
@@ -124,9 +124,9 @@
 	</licenses>
 	<developers>
 		<developer>
-			<name>YugaByte Development Team</name>
+			<name>YugabyteDB Development Team</name>
 			<email>info@yugabyte.com</email>
-			<organization>YugaByte, Inc.</organization>
+			<organization>Yugabyte, Inc.</organization>
 			<organizationUrl>https://www.yugabyte.com</organizationUrl>
 		</developer>
 	</developers>
