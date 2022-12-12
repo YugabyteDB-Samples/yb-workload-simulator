@@ -4,27 +4,50 @@ YB Workload Simulator is a Java application that simulates workloads against Yug
 
 <!-- We will be providing some starter projects/instructions for that soon. -->
 
-## Code setup and Installation
+## Download the jar
 
-### How to build the jar file
+YB Workload Simulator requires Java 11 or later installed on your computer. JDK installers for Linux and macOS can be downloaded from [Oracle](http://jdk.java.net/), [Adoptium (OpenJDK)](https://adoptium.net/), or [Azul Systems (OpenJDK)](https://www.azul.com/downloads/?package=jdk). Homebrew users on macOS can install using `brew install openjdk`.
 
-Go to the root of the project and run:
-
-```sh
-mvn clean package -DskipTests
-```
-
-This will create the jar file: <yb-simulation-base-demo-app>/target/yb-simulation-base-app.jar
-
-### How to run this App
-
-Here is the basic command. You can pass additional parameters as needed:
+Download the YB Workload Simulator JAR file (yb-simu-base-app.jar) using the following command:
 
 ```sh
-java -DXmx=16g -Dmax-pool-size=10 -Dnode=<database-ip-or-name> -Ddbuser=<db-user-id> -Ddbpassword=<db-password> -Dspring.datasource.hikari.data-source-properties.topologyKeys=<cloud.region.zone> -Dspring.workload=genericWorkload -jar yb-simu-base-app.jar
+wget https://github.com/YugabyteDB-Samples/yb-workload-simulator/releases/download/1.0/yb-simu-base-app.jar
 ```
 
-#### Parameters you can add to above java command
+## Run the application locally
+
+Install a local YugabyteDB cluster. Refer to [Set up your YugabyteDB cluster](https://docs.yugabyte.com/preview/explore/#set-up-your-yugabytedb-cluster) to start a local 3 node custer.
+
+To start the application against a running local cluster, use the following command:
+
+```sh
+java -jar ./yb-simu-base-app.jar
+```
+
+By default, the application connects to a local YugabyteDB cluster at 127.0.0.1.
+
+To connect to a different address or node, use the `-Dnode` flag to specify an IP address. For example:
+
+```sh
+java -Dnode=127.0.0.2 -jar ./yb-simu-base-app.jar
+```
+
+To view the application UI, navigate to `http://localhost:8080`.
+
+You can pass additional parameters as needed:
+
+```sh
+java -DXmx=16g
+     -Dmax-pool-size=10
+     -Dnode=<database-ip-or-name>
+     -Ddbuser=<db-user-id>
+     -Ddbpassword=<db-password>
+     -Dspring.datasource.hikari.data-source-properties.topologyKeys=<cloud.region.zone>
+     -Dspring.workload=genericWorkload
+     -jar yb-simu-base-app.jar
+```
+
+Parameters you can add to above java command are as follows:
 
 ```sh
 -Dnode=<database-host-name> [default: 127.0.0.1]
@@ -42,9 +65,36 @@ java -DXmx=16g -Dmax-pool-size=10 -Dnode=<database-ip-or-name> -Ddbuser=<db-user
 -Dsslrootcert=<certificatepath>
 ```
 
-#### Parameters for YugabyteDB Managed
+## Run the application on a YugabyteDB Managed cluster
 
-These will provide the ability to start/stop nodes and scale cluster from App UI:
+To connect the application to your cluster, ensure that you have downloaded the cluster SSL certificate and your computer is added to the IP allow list. Refer to [Before you begin](https://docs.yugabyte.com//preview/develop/build-apps/cloud-add-ip/).
+
+To start the application against a running YugabyteDB Managed cluster, use the following command:
+
+```sh
+java -Dnode=<host name> \
+     -Ddbname=<dbname> \
+     -Ddbuser=<dbuser> \
+     -Ddbpassword=<dbpassword> \
+     -Dssl=true \
+     -Dsslmode=verify-full \
+     -Dsslrootcert=<path-to-cluster-certificate> \
+     -jar ./yb-simu-base-app.jar
+```
+
+Replace the following:
+
+- `host name` - the host name of your YugabyteDB cluster. For YugabyteDB Managed, select your cluster on the Clusters page, and click Settings. The host is displayed under Connection Parameters.
+
+- `dbname` - the name of the database you are connecting to (the default is yugabyte).
+
+- `dbuser` and `dbpassword` - the username and password for the YugabyteDB database. Use the credentials in the credentials file you downloaded when you created your cluster.
+
+- `path-to-cluster-certificate` with the path to the cluster certificate on your computer.
+
+To view the application UI, navigate to `http://localhost:8080`.
+
+Additional parameters for YugabyteDB Managed to start/stop nodes and scale cluster from simulation application UI are as follows:
 
 ```sh
 -Dybm-account-id=<YBM Account Id>
@@ -52,6 +102,18 @@ These will provide the ability to start/stop nodes and scale cluster from App UI
 -Dybm-project-id=<YBM Project Id>
 -Dybm-cluster-id=<YBM Cluster Id>
 ```
+
+## Code setup and Installation
+
+### Build the jar file
+
+From the root of the project run the following maven command:
+
+```sh
+mvn clean package -DskipTests
+```
+
+A jar file gets created at : <yb-workload-simulator>/target/yb-workload-simulator.jar. You can [run the application locally](https://github.com/YugabyteDB-Samples/yb-workload-simulator/edit/main/README.md#run-the-application-locally) or using [YugabyteDB Managed](https://github.com/YugabyteDB-Samples/yb-workload-simulator/edit/main/README.md#run-the-application-on-a-yugabytedb-managed-cluster) using the jar.
 
 #### Additional parameters if you wish to run YCQL workload
 
@@ -63,64 +125,6 @@ These will provide the ability to start/stop nodes and scale cluster from App UI
 -Dspring.data.cassandra.userid=cassandra
 -Dspring.data.cassandra.password=<cassandra-password>
 ```
-
-## How to run locally
-
-Here are the steps to get the demo application to run on your local machine, starting with YugabyteDB.
-
-1. Have YugabyteDB installed on your local machine: <https://docs.yugabyte.com/preview/quick-start/>.
-
-1. Open a total of 3 IP addresses to be able to run YugabyteDB with a replication factor of 3, using this command:
-
-    ```sh
-    sudo ifconfig lo0 alias 127.0.0.2
-    sudo ifconfig lo0 alias 127.0.0.3
-    ```
-
-1. Go into the YugabyteDB directory to start a 3 node cluster locally with the following command
-
-    ```sh
-    ./bin/yb-ctl --rf 3 create
-    ```
-
-1. To verify that YugabyteDB is up and running you can run the command
-
-    ```sh
-    ./bin/yb-ctl status
-    ```
-
-1. Please have Java installed on your local machine. Here is a link to help with that process. Second link if you do not have an Oracle account:
-
-    * <https://www.youtube.com/watch?v=FsX0_RXMwvY>
-    * <https://dev.to/docker/how-to-setup-java-on-macos-124-monterey-3l10>
-
-    ![image](https://user-images.githubusercontent.com/78859174/192043252-88b9578d-7e79-49cd-bae6-486c8df1bf0c.png)
-
-1. To verify you have Java installed please run this command:
-
-    ```sh
-    java -version
-    ```
-
-1. For this demo we also need to install Maven, here is a link we have found helpful to install Maven on a Mac M1 computer: <https://www.youtube.com/watch?v=kCQKh_CscYA>
-
-1. To confirm you have successfully installed Maven on your Mac please use this command:
-
-    ```sh
-    mvn -v
-    ```
-
-    ![image](https://user-images.githubusercontent.com/78859174/192044014-ff113c98-24db-4b5a-aa0e-e12373f72cf6.png)
-
-1. Here is an **example invocation** using the defaults from `yb-ctl`:
-
-    ```sh
-    java -DXmx=16g -Dmax-pool-size=10 -Dnode=localhost -Ddbuser=yugabyte -Ddbpassword=yugabyte \
-        -Dspring.datasource.hikari.data-source-properties.topologyKeys=cloud1.datacenter1.rack1 \
-        -Dspring.workload=genericWorkload -jar target/yb-simu-base-app.jar
-    ```
-
-    The GUI is visible at <http://localhost:8080>
 
 ## How to build your own workload
 
@@ -155,8 +159,6 @@ Now go back to your terminal and within the YugabyteDB folder (the same place wh
 ```sh
 ./bin/yb-ctl stop_node 2
 ```
-
-![image](https://user-images.githubusercontent.com/78859174/192045896-003b5a72-d97c-4521-96a5-0f0e8cb63c93.png)
 
 As you can see there is a slight drop when the node is stopped and then it just keeps going!
 
