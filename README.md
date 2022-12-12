@@ -128,57 +128,43 @@ A jar file gets created at : <yb-workload-simulator>/target/yb-workload-simulato
 
 ## How to build your own workload
 
-Download the zip file
+1. Download the [workload simulator zip](https://github.com/YugabyteDB-Samples/yb-workload-simulator/archive/refs/heads/main.zip) file.
 
-### How to build the App
+1. From the root of the project run the following maven command:
 
-Go to the root of the project and run:
+    ```sh
+    ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+    ```
 
-```sh
-./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
-```
+    A jar file gets created at `<yb-workload-simulator>/target/yb-workload-simulator.jar`
 
-This will create the jar file: <yb-simulation-base-demo-app>/target/yb-simulation-base-app.jar
+    You can also get the jar file in VS Code by right clicking the "WorkloadSimulationApplication.java" file and selecting Run Java.
 
-You can also get the jar file in VS Code by right clicking the "WorkloadSimulationApplication.java" file and selecting Run Java.
+    ![image](https://user-images.githubusercontent.com/78859174/196289685-74854a5a-1cb5-4b50-81b9-08534bab9a25.png)
 
-![image](https://user-images.githubusercontent.com/78859174/196289685-74854a5a-1cb5-4b50-81b9-08534bab9a25.png)
+    You can verify the name of the "jar" file from the target directory using the name of that file where ever you see "yb-workload-simulation.jar"
 
-Then you can verify the name of the "jar" file by going to the target directory, use the name of that file where ever you see "yb-simulation-base-app.jar"
+    ![image](https://user-images.githubusercontent.com/78859174/196288218-13d499ee-a401-4b25-b95c-6e42c64a9824.png)
 
-![image](https://user-images.githubusercontent.com/78859174/196288218-13d499ee-a401-4b25-b95c-6e42c64a9824.png)
+## Start a read and write workload
 
-Now you can go to <http://localhost:8080> and you will see this
+To view the application UI, navigate to <http://localhost:8080>
 
-![image](https://user-images.githubusercontent.com/78859174/192045736-8cbb6ae0-9bd5-4fc6-ae0d-c2830192b669.png)
+1. In the application UI, click the hamburger icon at the top of the page beside **Active Workloads for Generic**.
 
-From here you can select the “hamburger” menu at the top and simulate your own workload!
+1. Select the **Usable Operations** tab.
 
-Now go back to your terminal and within the YugabyteDB folder (the same place where you started the node cluster). And you can stop a node by executing the following command
+1. Under **Create Tables**, click **Run Create Tables Workload** to add tables to the database.
 
-```sh
-./bin/yb-ctl stop_node 2
-```
+1. Under **Seed Data**, click **Run Seed Data Workload** to add data to the tables.
 
-As you can see there is a slight drop when the node is stopped and then it just keeps going!
+1. Under **Simulation**, select the **Include new Inserts** option, and click **Run Simulation Workload**.
 
-![image](https://user-images.githubusercontent.com/78859174/192046016-54f475fb-9237-41bc-a85a-5ea8036409ea.png)
+1. Click **Close**.
 
-Note: The Stop node button is still in Beta at the time of this documentation.
+The Latency and Throughput charts show the workload running on the cluster.
 
-You should have YugabyteDB "stopped" on your local machine. If you followed the steps above you should restart node 2 by typing:
-
-```sh
-./bin/yb-ctl start_node 2
-```
-
-Next we need to stop the cluster:
-
-```sh
-./bin/yb-ctl stop
-```
-
-## How to setup YBA Environment
+<!-- ## How to setup YBA Environment
 
 ### How to run this App
 
@@ -283,52 +269,44 @@ To try other work loads you can replace the genericWorkload from -Dworkload= lin
 
 ```sh
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
-```
-
-### Prod APP UI
-
-```http
-http://<HOSTNAME>:8080
-```
-
-![Screenshot](docs/image1.png)
-
-![Screenshot](docs/image2.png)
+``` -->
 
 ## Create your own workload .java file
 
-You can copy and paste the `GenericWorkload.java` file into a new file, name of your choosing (The development team behind this app would like consistency in the naming so please add `Workload` to the tail of your name). The demo in this example is named "InstructionsWorkload.java".
+To create your workload file, do the following:
 
-![image](https://user-images.githubusercontent.com/78859174/196455986-2a4df344-26dc-4fbc-a153-e3b66a71cb6e.png)
+1. Copy the `GenericWorkload.java` file into a file with a new name. The file in this example is named "InstructionsWorkload.java".
 
-There are 3 "FIX ME" sections to change the name of the class after you copy and paste the "GenericWorkload.java" file.
+    ![image](https://user-images.githubusercontent.com/78859174/196455986-2a4df344-26dc-4fbc-a153-e3b66a71cb6e.png)
 
-![image](https://user-images.githubusercontent.com/78859174/196456157-fd832363-496b-4b25-ba38-1d9826013517.png)
+    There are 3 "FIX ME" sections to change the name of the class after you copy and paste the "GenericWorkload.java" file.
 
-![image](https://user-images.githubusercontent.com/78859174/196456219-19325cf8-5ac7-400f-830f-ff1ba155b8b5.png)
+    ![image](https://user-images.githubusercontent.com/78859174/196456157-fd832363-496b-4b25-ba38-1d9826013517.png)
 
-![image](https://user-images.githubusercontent.com/78859174/196456330-4d10f7cd-8931-4f19-b664-5a58b702cbe0.png)
+    ![image](https://user-images.githubusercontent.com/78859174/196456219-19325cf8-5ac7-400f-830f-ff1ba155b8b5.png)
 
-To be able to call the new workload you have to modify the `WorkloadConfig.java` file found in [src/main/java/com/yugabyte/simulation/config/](src/main/java/com/yugabyte/simulation/config/).
+    ![image](https://user-images.githubusercontent.com/78859174/196456330-4d10f7cd-8931-4f19-b664-5a58b702cbe0.png)
 
-![image](https://user-images.githubusercontent.com/78859174/196456659-71160757-e5f5-44fc-9b0a-c87897e27292.png)
+1. To be able to call the new workload, you have to modify the `WorkloadConfig.java` file in [src/main/java/com/yugabyte/simulation/config/](src/main/java/com/yugabyte/simulation/config/).
 
-![image](https://user-images.githubusercontent.com/78859174/196456775-84b931c4-fccf-4abc-aaeb-d3541ad8327d.png)
+    ![image](https://user-images.githubusercontent.com/78859174/196456659-71160757-e5f5-44fc-9b0a-c87897e27292.png)
 
- After this you can run the "WorkloadSimulationApplication.java" as a java file:
+    ![image](https://user-images.githubusercontent.com/78859174/196456775-84b931c4-fccf-4abc-aaeb-d3541ad8327d.png)
 
-![image](https://user-images.githubusercontent.com/78859174/196457069-5f47b875-51a2-48cc-ae48-cf8991cc93ea.png)
+1. Run the "WorkloadSimulationApplication.java" as a java file.
 
-![image](https://user-images.githubusercontent.com/78859174/196457185-dfe2ee07-f1ba-4abf-9f59-718fdeb024df.png)
+    ![image](https://user-images.githubusercontent.com/78859174/196457069-5f47b875-51a2-48cc-ae48-cf8991cc93ea.png)
 
-This will create a new "jar" file in your target directory.
+    ![image](https://user-images.githubusercontent.com/78859174/196457185-dfe2ee07-f1ba-4abf-9f59-718fdeb024df.png)
 
-![image](https://user-images.githubusercontent.com/78859174/196457412-60f5adc1-aec1-4a14-b8ea-f63fd64a7acb.png)
+    A new "jar" file gets created in your target directory.
 
-You should now be able to run the code with the following command (code from line 136 above):
+    ![image](https://user-images.githubusercontent.com/78859174/196457412-60f5adc1-aec1-4a14-b8ea-f63fd64a7acb.png)
 
-![image](https://user-images.githubusercontent.com/78859174/196458425-88c0951f-c17e-41bb-98ec-d1fba7983128.png)
+1. You should be able to run the code with the following command (code from line 136 above):
 
-Navigate to <http://localhost:8080> and you will see the IP address of the machine you are using:
+    ![image](https://user-images.githubusercontent.com/78859174/196458425-88c0951f-c17e-41bb-98ec-d1fba7983128.png)
 
-![image](https://user-images.githubusercontent.com/78859174/196458637-30acf3d6-7fed-49f1-a64e-f38447acc975.png)
+1. Navigate to <http://localhost:8080> and you will see the IP address of the machine you are using:
+
+    ![image](https://user-images.githubusercontent.com/78859174/196458637-30acf3d6-7fed-49f1-a64e-f38447acc975.png)
