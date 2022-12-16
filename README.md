@@ -2,26 +2,33 @@ YB Workload Simulator application
 
 YB Workload Simulator is a Java application that simulates workloads against YugabyteDB and provides live metrics of latency and throughput from the application's point of view. You can create/drop tables for a workload, load data, run different simulations from the application UI. You can view latency and throughput metrics in real time for your YugabyteDB cluster when the simulations are running. This repository acts as a base and you can extend it to write your specific simulations.
 
-<!-- We will be providing some starter projects/instructions for that soon. -->
+Table of contents
+=================
+
+* [Download the jar](#download-the-jar)
+   * [Run the application locally](#run-the-application-locally)
+   * [Run the application on a YugabyteDB Managed cluster](#run-the-application-on-a-yugabytedb-managed-cluster)
+* [Code setup and Installation](#code-setup-and-installation)
+   * [Build the jar file](#build-the-jar-file)
+      * [Additional parameters required to run YCQL workload](#additional-parameters-required-to-run-ycql-workload)
+* [How to build your own workload](#how-to-build-your-own-workload)
+* [Start a read and write workload](#start-a-read-and-write-workload)
+* [Create your own workload .java file](#create-your-own-workload-java-file)
 
 ## Download the jar
 
-YB Workload Simulator requires Java 11 or later installed on your computer. JDK installers for Linux and macOS can be downloaded from [Oracle](http://jdk.java.net/), [Adoptium (OpenJDK)](https://adoptium.net/), or [Azul Systems (OpenJDK)](https://www.azul.com/downloads/?package=jdk). Homebrew users on macOS can install using `brew install openjdk`.
+YB Workload Simulator requires Java 19 or later installed on your computer. JDK installers for Linux and macOS can be downloaded from [Oracle](http://jdk.java.net/), [Adoptium (OpenJDK)](https://adoptium.net/), or [Azul Systems (OpenJDK)](https://www.azul.com/downloads/?package=jdk). Homebrew users on macOS can install using `brew install openjdk`.
 
-Download the YB Workload Simulator JAR file (yb-simu-base-app.jar) using the following command:
+Download the latest YB Workload Simulator JAR file (yb-workload-sim-0.0.2.jar) from the [releases](https://github.com/YugabyteDB-Samples/yb-workload-simulator/releases) page.
 
-```sh
-wget https://github.com/YugabyteDB-Samples/yb-workload-simulator/releases/download/1.0/yb-simu-base-app.jar
-```
-
-## Run the application locally
+### Run the application locally
 
 Install a local YugabyteDB cluster. Refer to [Set up your YugabyteDB cluster](https://docs.yugabyte.com/preview/explore/#set-up-your-yugabytedb-cluster) to start a local 3 node custer.
 
 To start the application against a running local cluster, use the following command:
 
 ```sh
-java -jar ./yb-simu-base-app.jar
+java -jar ./yb-workload-sim-0.0.2.jar
 ```
 
 By default, the application connects to a local YugabyteDB cluster at 127.0.0.1.
@@ -29,7 +36,7 @@ By default, the application connects to a local YugabyteDB cluster at 127.0.0.1.
 To connect to a different address or node, use the `-Dnode` flag to specify an IP address. For example:
 
 ```sh
-java -Dnode=127.0.0.2 -jar ./yb-simu-base-app.jar
+java -Dnode=127.0.0.2 -jar ./yb-workload-sim-0.0.2.jar
 ```
 
 To view the application UI, navigate to `http://localhost:8080`.
@@ -44,10 +51,10 @@ java -DXmx=16g
      -Ddbpassword=<db-password>
      -Dspring.datasource.hikari.data-source-properties.topologyKeys=<cloud.region.zone>
      -Dspring.workload=genericWorkload
-     -jar yb-simu-base-app.jar
+     -jar yb-workload-sim-0.0.2.jar
 ```
 
-Parameters you can add to above java command are as follows:
+The parameters you can add to the java command are as follows:
 
 ```sh
 -Dnode=<database-host-name> [default: 127.0.0.1]
@@ -65,7 +72,7 @@ Parameters you can add to above java command are as follows:
 -Dsslrootcert=<certificatepath>
 ```
 
-## Run the application on a YugabyteDB Managed cluster
+### Run the application on a YugabyteDB Managed cluster
 
 To connect the application to your cluster, ensure that you have downloaded the cluster SSL certificate and your computer is added to the IP allow list. Refer to [Before you begin](https://docs.yugabyte.com//preview/develop/build-apps/cloud-add-ip/).
 
@@ -79,7 +86,7 @@ java -Dnode=<host name> \
      -Dssl=true \
      -Dsslmode=verify-full \
      -Dsslrootcert=<path-to-cluster-certificate> \
-     -jar ./yb-simu-base-app.jar
+     -jar ./yb-workload-sim-0.0.2.jar
 ```
 
 Replace the following:
@@ -115,7 +122,7 @@ mvn clean package -DskipTests
 
 A jar file gets created at : <yb-workload-simulator>/target/yb-workload-simulator.jar. You can [run the application locally](https://github.com/YugabyteDB-Samples/yb-workload-simulator/edit/main/README.md#run-the-application-locally) or using [YugabyteDB Managed](https://github.com/YugabyteDB-Samples/yb-workload-simulator/edit/main/README.md#run-the-application-on-a-yugabytedb-managed-cluster) using the jar.
 
-#### Additional parameters if you wish to run YCQL workload
+#### Additional parameters required to run YCQL workload
 
 ```sh
 -Dworkload=genericCassandraWorkload
@@ -128,9 +135,9 @@ A jar file gets created at : <yb-workload-simulator>/target/yb-workload-simulato
 
 ## How to build your own workload
 
-1. Download the [workload simulator zip](https://github.com/YugabyteDB-Samples/yb-workload-simulator/archive/refs/heads/main.zip) file.
+1. Download the latest archive from the [releases](https://github.com/YugabyteDB-Samples/yb-workload-simulator/releases) page and unzip the file.
 
-1. From the root of the project run the following maven command:
+1. From the root of your project run the following maven command:
 
     ```sh
     ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
@@ -142,7 +149,7 @@ A jar file gets created at : <yb-workload-simulator>/target/yb-workload-simulato
 
     ![image](https://user-images.githubusercontent.com/78859174/196289685-74854a5a-1cb5-4b50-81b9-08534bab9a25.png)
 
-    You can verify the name of the "jar" file from the target directory using the name of that file where ever you see "yb-workload-simulation.jar"
+    You can verify the name of the "jar" file from the target directory using the name of that file where ever you see "yb-workload-sim-0.0.2.jar"
 
     ![image](https://user-images.githubusercontent.com/78859174/196288218-13d499ee-a401-4b25-b95c-6e42c64a9824.png)
 
