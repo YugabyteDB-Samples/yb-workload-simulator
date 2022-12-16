@@ -1,9 +1,8 @@
-YB Workload Simulator application
+# YB Workload Simulator application
 
 YB Workload Simulator is a Java application that simulates workloads against YugabyteDB and provides live metrics of latency and throughput from the application's point of view. You can create/drop tables for a workload, load data, run different simulations from the application UI. You can view latency and throughput metrics in real time for your YugabyteDB cluster when the simulations are running. This repository acts as a base and you can extend it to write your specific simulations.
 
-Table of contents
-=================
+## Table of contents
 
 * [Download the jar](#download-the-jar)
    * [Run the application locally](#run-the-application-locally)
