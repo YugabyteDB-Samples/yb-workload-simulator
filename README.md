@@ -9,7 +9,7 @@ YB Workload Simulator is a Java application that simulates workloads against Yug
    * [Run the application on a YugabyteDB Managed cluster](#run-the-application-on-a-yugabytedb-managed-cluster)
 * [Code setup and Installation](#code-setup-and-installation)
    * [Build the jar file](#build-the-jar-file)
-      * [Additional parameters required to run YCQL workload](#additional-parameters-required-to-run-ycql-workload)
+      * [Additional parameters for YCQL workloads](#additional-parameters-for-ycql-workloads)
 * [How to build your own workload](#how-to-build-your-own-workload)
 * [Start a read and write workload](#start-a-read-and-write-workload)
 * [Create your own workload .java file](#create-your-own-workload-java-file)
@@ -18,96 +18,98 @@ YB Workload Simulator is a Java application that simulates workloads against Yug
 
 YB Workload Simulator requires Java 19 or later installed on your computer. JDK installers for Linux and macOS can be downloaded from [Oracle](http://jdk.java.net/), [Adoptium (OpenJDK)](https://adoptium.net/), or [Azul Systems (OpenJDK)](https://www.azul.com/downloads/?package=jdk). Homebrew users on macOS can install using `brew install openjdk`.
 
-Download the latest YB Workload Simulator JAR file (yb-workload-sim-0.0.2.jar) from the [releases](https://github.com/YugabyteDB-Samples/yb-workload-simulator/releases) page.
+Download the latest YB Workload Simulator JAR file from the [releases](https://github.com/YugabyteDB-Samples/yb-workload-simulator/releases) page.
 
 ### Run the application locally
 
-Install a local YugabyteDB cluster. Refer to [Set up your YugabyteDB cluster](https://docs.yugabyte.com/preview/explore/#set-up-your-yugabytedb-cluster) to start a local 3 node custer.
+To run the application locally, do the following:
 
-To start the application against a running local cluster, use the following command:
+1. Install a local YugabyteDB cluster. Refer to [Set up your YugabyteDB cluster](https://docs.yugabyte.com/preview/explore/#set-up-your-yugabytedb-cluster) to start a local 3 node custer.
 
-```sh
-java -jar ./yb-workload-sim-0.0.2.jar
-```
+1. To start the application against a running local cluster, use the following command:
 
-By default, the application connects to a local YugabyteDB cluster at 127.0.0.1.
+    ```sh
+    java -jar ./yb-workload-sim-0.0.2.jar
+    ```
 
-To connect to a different address or node, use the `-Dnode` flag to specify an IP address. For example:
+    By default, the application connects to a local YugabyteDB cluster at 127.0.0.1.
 
-```sh
-java -Dnode=127.0.0.2 -jar ./yb-workload-sim-0.0.2.jar
-```
+    To connect to a different address or node, use the `-Dnode` flag to specify an IP address. For example:
 
-To view the application UI, navigate to `http://localhost:8080`.
+    ```sh
+    java -Dnode=127.0.0.2 -jar ./yb-workload-sim-0.0.2.jar
+    ```
 
-You can pass additional parameters as needed:
+1. To view the application UI, navigate to `http://localhost:8080`.
 
-```sh
-java -DXmx=16g
-     -Dmax-pool-size=10
-     -Dnode=<database-ip-or-name>
-     -Ddbuser=<db-user-id>
-     -Ddbpassword=<db-password>
-     -Dspring.datasource.hikari.data-source-properties.topologyKeys=<cloud.region.zone>
-     -Dspring.workload=genericWorkload
-     -jar yb-workload-sim-0.0.2.jar
-```
+   You can pass additional parameters as needed:
 
-The parameters you can add to the java command are as follows:
+    ```sh
+    java -DXmx=16g
+         -Dmax-pool-size=10
+         -Dnode=<database-ip-or-name>
+         -Ddbuser=<db-user-id>
+         -Ddbpassword=<db-password>
+         -Dspring.datasource.hikari.data-source-properties.topologyKeys=<cloud.region.zone>
+         -Dspring.workload=genericWorkload
+         -jar yb-workload-sim-0.0.2.jar
+    ```
 
-```sh
--Dnode=<database-host-name> [default: 127.0.0.1]
--Ddbuser=<userid> [default: yugabyte]
--Ddbpassword=<password> [default: yugabyte]
--Dport=<port> [default: 5433 - database port if using other than 5433]
--Dmax-pool-size=<max-pool-size> [default: 100]
--Ddbname=<dbname> [default: yugabyte]
--Dworkload=<workload-id> [ default: genericWorkload ]
--Dspring.datasource.hikari.data-source-properties.topologyKeys=<cloud.region.zone> [ex. aws.us-east-2.us-east-2a,aws.us-east-2.us-east-2b,aws.us-east-2.us-east-2c]
--Dspring.profiles.active=<profile> [default: application.yaml]
--Dserver.port=<app-ui-port> [default: 8080]
--Dssl=true [default: false]
--Dsslmode=verify-full [default: disable]
--Dsslrootcert=<certificatepath>
-```
+    The parameters you can add to the java command are as follows:
+
+    ```sh
+    -Dnode=<database-host-name> [default: 127.0.0.1]
+    -Ddbuser=<userid> [default: yugabyte]
+    -Ddbpassword=<password> [default: yugabyte]
+    -Dport=<port> [default: 5433 - database port if using other than 5433]
+    -Dmax-pool-size=<max-pool-size> [default: 100]
+    -Ddbname=<dbname> [default: yugabyte]
+    -Dworkload=<workload-id> [ default: genericWorkload ]
+    -Dspring.datasource.hikari.data-source-properties.topologyKeys=<cloud.region.zone> [ex. aws.us-east-2.us-east-2a,aws.us-east-2.us-east-2b,aws.us-east-2.us-east-2c]
+    -Dspring.profiles.active=<profile> [default: application.yaml]
+    -Dserver.port=<app-ui-port> [default: 8080]
+    -Dssl=true [default: false]
+    -Dsslmode=verify-full [default: disable]
+    -Dsslrootcert=<certificatepath>
+    ```
 
 ### Run the application on a YugabyteDB Managed cluster
 
-To connect the application to your cluster, ensure that you have downloaded the cluster SSL certificate and your computer is added to the IP allow list. Refer to [Before you begin](https://docs.yugabyte.com//preview/develop/build-apps/cloud-add-ip/).
+1. To connect the application to your cluster, ensure that you have downloaded the cluster SSL certificate and your computer is added to the IP allow list. Refer to [Before you begin](https://docs.yugabyte.com//preview/develop/build-apps/cloud-add-ip/).
 
-To start the application against a running YugabyteDB Managed cluster, use the following command:
+1. To start the application against a running YugabyteDB Managed cluster, use the following command:
 
-```sh
-java -Dnode=<host name> \
-     -Ddbname=<dbname> \
-     -Ddbuser=<dbuser> \
-     -Ddbpassword=<dbpassword> \
-     -Dssl=true \
-     -Dsslmode=verify-full \
-     -Dsslrootcert=<path-to-cluster-certificate> \
-     -jar ./yb-workload-sim-0.0.2.jar
-```
+    ```sh
+    java -Dnode=<host name> \
+         -Ddbname=<dbname> \
+         -Ddbuser=<dbuser> \
+         -Ddbpassword=<dbpassword> \
+         -Dssl=true \
+         -Dsslmode=verify-full \
+         -Dsslrootcert=<path-to-cluster-certificate> \
+         -jar ./yb-workload-sim-0.0.2.jar
+    ```
 
-Replace the following:
+    Replace the following:
 
-- `host name` - the host name of your YugabyteDB cluster. For YugabyteDB Managed, select your cluster on the Clusters page, and click Settings. The host is displayed under Connection Parameters.
+    * `host name` - the host name of your YugabyteDB cluster. For YugabyteDB Managed, select your cluster on the Clusters page, and click Settings. The host is displayed under Connection Parameters.
 
-- `dbname` - the name of the database you are connecting to (the default is yugabyte).
+    * `dbname` - the name of the database you are connecting to (the default is yugabyte).
 
-- `dbuser` and `dbpassword` - the username and password for the YugabyteDB database. Use the credentials in the credentials file you downloaded when you created your cluster.
+    * `dbuser` and `dbpassword` - the username and password for the YugabyteDB database. Use the credentials in the credentials file you downloaded when you created your cluster.
 
-- `path-to-cluster-certificate` with the path to the cluster certificate on your computer.
+    * `path-to-cluster-certificate` with the path to the cluster certificate on your computer.
 
-To view the application UI, navigate to `http://localhost:8080`.
+1. To view the application UI, navigate to `http://localhost:8080`.
 
-Additional parameters for YugabyteDB Managed to start/stop nodes and scale cluster from simulation application UI are as follows:
+    Additional parameters for YugabyteDB Managed to start/stop nodes and scale cluster from simulation application UI are as follows:
 
-```sh
--Dybm-account-id=<YBM Account Id>
--Dybm-api-key=<YBM API Key>
--Dybm-project-id=<YBM Project Id>
--Dybm-cluster-id=<YBM Cluster Id>
-```
+    ```sh
+    -Dybm-account-id=<YBM Account Id>
+    -Dybm-api-key=<YBM API Key>
+    -Dybm-project-id=<YBM Project Id>
+    -Dybm-cluster-id=<YBM Cluster Id>
+    ```
 
 ## Code setup and Installation
 
@@ -119,9 +121,9 @@ From the root of the project run the following maven command:
 mvn clean package -DskipTests
 ```
 
-A jar file gets created at : <yb-workload-simulator>/target/yb-workload-simulator.jar. You can [run the application locally](https://github.com/YugabyteDB-Samples/yb-workload-simulator/edit/main/README.md#run-the-application-locally) or using [YugabyteDB Managed](https://github.com/YugabyteDB-Samples/yb-workload-simulator/edit/main/README.md#run-the-application-on-a-yugabytedb-managed-cluster) using the jar.
+A jar file gets created at : <yb-workload-sim>/target/yb-workload-simulator.jar. You can [run the application locally](https://github.com/YugabyteDB-Samples/yb-workload-simulator/edit/main/README.md#run-the-application-locally) using [YugabyteDB Managed](#run-the-application-on-a-yugabytedb-managed-cluster) using the jar.
 
-#### Additional parameters required to run YCQL workload
+#### Additional parameters for YCQL workloads
 
 ```sh
 -Dworkload=genericCassandraWorkload
@@ -142,13 +144,13 @@ A jar file gets created at : <yb-workload-simulator>/target/yb-workload-simulato
     ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
     ```
 
-    A jar file gets created at `<yb-workload-simulator>/target/yb-workload-simulator.jar`
+    A jar file gets created at `<yb-workload-sim>/target/yb-simu-base-app.jar`
 
     You can also get the jar file in VS Code by right clicking the "WorkloadSimulationApplication.java" file and selecting Run Java.
 
     ![image](https://user-images.githubusercontent.com/78859174/196289685-74854a5a-1cb5-4b50-81b9-08534bab9a25.png)
 
-    You can verify the name of the "jar" file from the target directory using the name of that file where ever you see "yb-workload-sim-0.0.2.jar"
+    Verify the name of the jar file in the target directory, and use the name of that file wherever you see `yb-workload-sim-0.0.2.jar`.
 
     ![image](https://user-images.githubusercontent.com/78859174/196288218-13d499ee-a401-4b25-b95c-6e42c64a9824.png)
 
