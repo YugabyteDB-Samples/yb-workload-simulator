@@ -125,7 +125,7 @@ public class GenericWorkload extends WorkloadSimulationBase implements WorkloadS
 
     private WorkloadDesc runningWorkload = new WorkloadDesc(
             GenericWorkload.WorkloadType.RUN_SIMULATION.toString(),
-            "Simulation",
+            "Simulation - old",
             "Run a simulation of a reads from 3 tables (Latency on charts will show cumulative value for 3 selects and 3 inserts)",
             new WorkloadParamDesc("Throughput (tps)", 1, 1000000, 500),
             new WorkloadParamDesc("Max Threads", 1, 500, 64),
@@ -134,7 +134,7 @@ public class GenericWorkload extends WorkloadSimulationBase implements WorkloadS
 
     private WorkloadDesc simulationFixedWorkload = new WorkloadDesc(
             GenericWorkload.WorkloadType.RUN_SIMULATION_FIXED_WORKLOAD.toString(),
-            "Simulation Fixed Target",
+            "Simulation",
             "Run a simulation of a reads from 3 tables (Latency on charts will show cumulative value for 3 selects and 3 inserts)",
             new WorkloadParamDesc("Invocations", 1, 10000000, 1000000),
             new WorkloadParamDesc("Max Threads", 1, 500, 64),
@@ -148,7 +148,7 @@ public class GenericWorkload extends WorkloadSimulationBase implements WorkloadS
                 createTablesWorkload
                 , seedingWorkload
                 , simulationFixedWorkload
-                , runningWorkload
+//                , runningWorkload
         );
     }
 
