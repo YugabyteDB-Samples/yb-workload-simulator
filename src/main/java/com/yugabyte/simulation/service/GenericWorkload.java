@@ -81,6 +81,7 @@ public class GenericWorkload extends WorkloadSimulationBase implements WorkloadS
     private enum WorkloadType {
         CREATE_TABLES,
         SEED_DATA,
+        RUN_SIMULATION_FIXED_WORKLOAD,
         RUN_SIMULATION,
         RUN_LIKE_QUERY_ON_GENERIC2,
         RUN_LIKE_QUERY_ON_GENERIC3,
@@ -91,6 +92,7 @@ public class GenericWorkload extends WorkloadSimulationBase implements WorkloadS
     private final FixedStepsWorkloadType createTablesWorkloadType;
     private final FixedTargetWorkloadType seedingWorkloadType;
     private final ThroughputWorkloadType runInstanceType;
+    private final FixedTargetWorkloadType simulationFixedWorkloadType;
 
     public GenericWorkload() {
         this.createTablesWorkloadType = new FixedStepsWorkloadType(
@@ -104,6 +106,7 @@ public class GenericWorkload extends WorkloadSimulationBase implements WorkloadS
 
         this.seedingWorkloadType = new FixedTargetWorkloadType();
         this.runInstanceType = new ThroughputWorkloadType();
+        this.simulationFixedWorkloadType = new FixedTargetWorkloadType();
     }
 
     private WorkloadDesc createTablesWorkload = new WorkloadDesc(
@@ -122,9 +125,18 @@ public class GenericWorkload extends WorkloadSimulationBase implements WorkloadS
 
     private WorkloadDesc runningWorkload = new WorkloadDesc(
             GenericWorkload.WorkloadType.RUN_SIMULATION.toString(),
-            "Simulation",
+            "Simulation - old",
             "Run a simulation of a reads from 3 tables (Latency on charts will show cumulative value for 3 selects and 3 inserts)",
             new WorkloadParamDesc("Throughput (tps)", 1, 1000000, 500),
+            new WorkloadParamDesc("Max Threads", 1, 500, 64),
+            new WorkloadParamDesc("Include new Inserts (to 3 tables)", false)
+    );
+
+    private WorkloadDesc simulationFixedWorkload = new WorkloadDesc(
+            GenericWorkload.WorkloadType.RUN_SIMULATION_FIXED_WORKLOAD.toString(),
+            "Simulation",
+            "Run a simulation of a reads from 3 tables (Latency on charts will show cumulative value for 3 selects and 3 inserts)",
+            new WorkloadParamDesc("Invocations", 1, 10000000, 1000000),
             new WorkloadParamDesc("Max Threads", 1, 500, 64),
             new WorkloadParamDesc("Include new Inserts (to 3 tables)", false)
     );
@@ -135,7 +147,8 @@ public class GenericWorkload extends WorkloadSimulationBase implements WorkloadS
         return Arrays.asList(
                 createTablesWorkload
                 , seedingWorkload
-                , runningWorkload
+                , simulationFixedWorkload
+//                , runningWorkload
         );
     }
 
@@ -148,16 +161,15 @@ public class GenericWorkload extends WorkloadSimulationBase implements WorkloadS
                 case CREATE_TABLES:
                     this.createTables();
                     return new InvocationResult("Ok");
-
                 case SEED_DATA:
                     this.seedData(values[0].getIntValue(), values[1].getIntValue());
                     return new InvocationResult("Ok");
-
                 case RUN_SIMULATION:
                     this.runSimulation(values);
                     return new InvocationResult("Ok");
-
-
+                case RUN_SIMULATION_FIXED_WORKLOAD:
+                    this.runSimulationFixedWorkload(values);
+                    return new InvocationResult("Ok");
                 case STOP_NODE:
                     return new InvocationResult("Ok");
                 case START_NODE:
@@ -219,6 +231,27 @@ public class GenericWorkload extends WorkloadSimulationBase implements WorkloadS
         return results;
     }
 
+    private void runSimulationFixedWorkload(ParamValue[] values) {
+        int numOfInvocations = values[0].getIntValue();
+        int maxThreads = values[1].getIntValue();
+        boolean runInserts = values[2].getBoolValue();
+        System.out.println("**** Preloading data...");
+        final List<UUID> uuids = getQueryList();
+        System.out.println("**** Preloading complete...");
+        Random random = ThreadLocalRandom.current();
+        seedingWorkloadType
+                .createInstance(serviceManager)
+                .execute(maxThreads, numOfInvocations, (customData, threadData) -> {
+                    UUID id = uuids.get(random.nextInt(uuids.size()));
+                    runPointReadgeneric1(id);
+                    runPointReadgeneric2(id);
+                    runPointReadgeneric3(id);
+                    if(runInserts){
+                        runInserts();
+                    }
+                    return threadData;
+                });
+    }
 
     private void runSimulation(ParamValue[] values) {
     	int tps = values[0].getIntValue();
