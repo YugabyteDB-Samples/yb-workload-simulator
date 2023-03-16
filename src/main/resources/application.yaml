@@ -16,7 +16,7 @@ spring:
         serverName: ${node:127.0.0.1}
         portNumber: ${port:5433}
         databaseName: ${dbname:yugabyte}
-        topologyKeys: "aws.us-west-2"
+        topologyKeys: "aws.us-west-2.*"
         #ssl: ${ssl:false}
         #sslmode: ${sslmode:disable}
         #sslrootcert: ${sslrootcert:~/.ssh/ybcloudcert/root.crt}
