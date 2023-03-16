@@ -15,7 +15,7 @@ spring:
         portNumber: 5433
         databaseName: yugabyte
         additionalEndpoints:
-        topologyKeys: "aws.us-west-2"
+        topologyKeys: "aws.us-west-2.*"
 
 
 logging.level:
