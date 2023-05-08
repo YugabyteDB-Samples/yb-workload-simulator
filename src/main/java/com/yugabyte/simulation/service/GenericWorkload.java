@@ -216,11 +216,43 @@ public class GenericWorkload extends WorkloadSimulationBase implements WorkloadS
                 });
     }
 
+
+    /*
+    Assume some number of ranges: 64 (does not really have to map to number of tablets)
+    From each range get these many rows: 10K rows needed DIVIDED BY num_ranges --> ~156 rows/range.
+    From these 64 hash code ranges, now ask for 156 rows each.
+
+    SELECT pkid FROM T where yb_hash_code(pkid) >= 0 and yb_hash_code(pkid) < 1024 LIMIT 156
+    UNION ALL
+    SELECT pkid FROM T where yb_hash_code(pkid) >= 1024 and yb_hash_code(pkid) < 2048 LIMIT 156
+    ..
+    ...
+    UNION ALL
+    SELECT pkid FROM T where yb_hash_code(pkid) >= 64512 and yb_hash_code(pkid) < 65536
+     */
+
     private List<UUID> getQueryList() {
         List<UUID> results = new ArrayList<UUID>(ROWS_TO_PRELOAD);
+        int numOfRanges = 64;
+        int limit = ROWS_TO_PRELOAD/numOfRanges;
+        int runningHashCodeVal = 0;
+        StringBuffer sbQuery = new StringBuffer();
+
+        while(runningHashCodeVal < 65536){
+            if(runningHashCodeVal != 0){
+                sbQuery.append(" UNION ALL ");
+            }
+            int nextHashVal = runningHashCodeVal + 1024;
+            sbQuery.append(" (SELECT pkid FROM generic1 where yb_hash_code(pkid) >= "+runningHashCodeVal+" and yb_hash_code(pkid) < "+nextHashVal+" LIMIT "+limit+") ");
+            runningHashCodeVal = nextHashVal;
+        }
+
+
+
         jdbcTemplate.setMaxRows(ROWS_TO_PRELOAD);
         jdbcTemplate.setFetchSize(ROWS_TO_PRELOAD);
-        jdbcTemplate.query("select pkid, yb_hash_code(pkid) from generic1 where yb_hash_code(pkid) % 7 = 0 limit " + ROWS_TO_PRELOAD,
+        System.out.println("query:"+sbQuery.toString());
+        jdbcTemplate.query(sbQuery.toString(),
                 new RowCallbackHandler() {
                     @Override
                     public void processRow(ResultSet rs) throws SQLException {
@@ -228,6 +260,12 @@ public class GenericWorkload extends WorkloadSimulationBase implements WorkloadS
                         results.add(value);
                     }
                 });
+
+//        System.out.println("list of pkids:");
+//        for(UUID pkId: results){
+//            System.out.print(pkId.toString()+",");
+//        }
+
         return results;
     }
 
