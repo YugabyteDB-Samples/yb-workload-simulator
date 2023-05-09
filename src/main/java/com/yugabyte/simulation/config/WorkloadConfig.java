@@ -1,14 +1,8 @@
 package com.yugabyte.simulation.config;
 
+import com.yugabyte.simulation.service.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import com.yugabyte.simulation.service.GenericCassandraWorkload;
-import com.yugabyte.simulation.service.GenericWorkload;
-import com.yugabyte.simulation.service.NewFormatWorkload;
-import com.yugabyte.simulation.service.PitrSqlDemoWorkload;
-import com.yugabyte.simulation.service.SimpleSelectWorkload;
-import com.yugabyte.simulation.service.WorkloadSimulation;
 
 @Configuration
 public class WorkloadConfig {
@@ -37,4 +31,8 @@ public class WorkloadConfig {
         return new GenericCassandraWorkload();
     }
 
+    @Bean(name="QuikShipWorkload")
+    public WorkloadSimulation quikShipWorkload(){
+        return new QuikShipWorkload();
+    }
 }
