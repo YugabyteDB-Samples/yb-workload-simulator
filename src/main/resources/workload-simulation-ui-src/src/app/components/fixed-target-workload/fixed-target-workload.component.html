@@ -1,21 +1,23 @@
 <div class="grid">
     <div class="col" style="height: 300px;">
-        <div style = "width: 100%; height: 100%; background-color: black;">
-            <app-statistics-graph style="width: 100%" [idName]="workloadId" [timingData]="data.results" [duration]="duration" [timingType]="'LATENCY'" [timingMetric]="'WORKLOAD1'" [timingMetricName]="''"></app-statistics-graph> 
+        <div style = "width: 100%; height: 100%; background-color: white;color:black;">
+            <app-statistics-graph style="width: 100%" [idName]="workloadId" [timingData]="data.results" [duration]="duration" [timingType]="'LATENCY'" [timingMetric]="'WORKLOAD1'" [timingMetricName]="''"></app-statistics-graph>
         </div>
     </div>
     <div class="col" style="height: 300px;">
-        <div style = "width: 100%; height: 100%; background-color: black;">
+        <div style = "width: 100%; height: 100%; background-color: white;color:black;">
             <app-statistics-graph [idName]="workloadId + 'THROUGHPUT'" [timingData]="data.results" [duration]="duration" [timingType]="'THROUGHPUT'" [timingMetric]="'WORKLOAD1'" [timingMetricName]="''"></app-statistics-graph>
         </div>
     </div>
 </div>
-<div style="font-size: 48pt; text-align: center; color: white; background-color: black; padding: 0.2em;">
+<div style="font-size: 24pt; text-align: center; color: black; background-color: white; padding: 0.2em;">
     <div class="grid">
+      <span class="col">Transactions/sec: {{(getLatestData().throughput) | number:'1.0-1'}}</span>
+      <span class="col">Avg Latency: {{(getLatestData().avgLatency / 1000) | number:'1.0-1'}}ms</span>
         <span class="col">Completed: {{(getLatestData().percentageComplete/100) | percent:'1.0-1'}}</span>
         <span class="col">Time Remaining: {{(getLatestData().timeRemainingInMs / 1000) | number:'1.0-0'}}s</span>
     </div>
     <div style="font-size: 16pt; padding-top: 1.5rem;">
-        Completed: {{getLatestData().completed | number:'1.0':'en-US'}} / {{getLatestData().target | number:'1.0':'en-US'}}
+      Transactions Completed: {{getLatestData().completed | number:'1.0':'en-US'}} / {{getLatestData().target | number:'1.0':'en-US'}}
     </div>
 </div>

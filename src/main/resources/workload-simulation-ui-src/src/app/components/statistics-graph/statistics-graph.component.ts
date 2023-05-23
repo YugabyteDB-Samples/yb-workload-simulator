@@ -72,7 +72,7 @@ export class StatisticsGraphComponent implements OnInit, AfterViewInit, OnChange
     private host : ElementRef,
     private zone : NgZone,
     private ybServer : YugabyteDataSourceService
-  ) { 
+  ) {
   }
 
   ngOnInit(): void {
@@ -173,7 +173,7 @@ export class StatisticsGraphComponent implements OnInit, AfterViewInit, OnChange
         .attr('y', 1)
         .attr('width', boxWidth)
         .attr('height', boxHeight)
-        .attr('stroke', 'white')
+        .attr('stroke', 'black')
         .attr('fill', 'none');
 
     let labels = [];
@@ -186,11 +186,11 @@ export class StatisticsGraphComponent implements OnInit, AfterViewInit, OnChange
     for (let i = 0; i < labels.length; i++) {
       let startX = (boxWidth / labels.length) * i;
       let classType = (i == 0) ? 'lineMin' : (i == 1) ? 'line' : 'lineMax';
-      xLabel.append("line") 
+      xLabel.append("line")
         .attr("x1", startX + 12)
-        .attr("y1", boxHeight/2)      
-        .attr("x2", startX + 30) 
-        .attr("y2", boxHeight/2) 
+        .attr("y1", boxHeight/2)
+        .attr("x2", startX + 30)
+        .attr("y2", boxHeight/2)
         .attr('class', 'data ' + classType);
       let textItem = xLabel.append('text')
         .attr('class', 'legendLabel ' + classType)
@@ -198,9 +198,9 @@ export class StatisticsGraphComponent implements OnInit, AfterViewInit, OnChange
         .attr('x', startX + 34)
         .attr('y', 18)
         .attr('font-size', '1em')
-        .attr('fill', 'white')
+        .attr('fill', 'black')
         .text(labels[i])
-        .on("click", (evt : any, x: any) => { 
+        .on("click", (evt : any, x: any) => {
           let thisObj = d3.select(evt.srcElement);
           this.toggleVisibility(LineType.AVG, thisObj);
           this.toggleVisibility(LineType.MIN, thisObj);
@@ -336,7 +336,7 @@ export class StatisticsGraphComponent implements OnInit, AfterViewInit, OnChange
       .attr("y", this.margins.top)
       .attr("width", this.width-this.margins.left - this.margins.right+1)
       .attr("height", this.height - this.margins.top - this.margins.bottom);
-						
+
     var visCont = this.svg.append('g')
             .attr("clip-path", "url(#clip" + rand + ")")
             .attr('class', 'vis');
@@ -388,7 +388,7 @@ export class StatisticsGraphComponent implements OnInit, AfterViewInit, OnChange
       return (d3.max(this.data, d => this.getTotalTxns(d)) || 0) + 1;
     }
   }
-  
+
   private validatePoint(point : TimingPoint) : boolean {
     if (!point || !point.startTimeMs) return false;
     if (this.minTime > 0) return point.startTimeMs >= this.minTime;
@@ -507,8 +507,8 @@ export class StatisticsGraphComponent implements OnInit, AfterViewInit, OnChange
           let cursor = d3.pointer(evt)[0];
           let date = this.xScale.invert(cursor);
           let time = date.getTime();
-          let point = d3.bisector(function(d) { 
-            return (d as TimingPoint).startTimeMs; 
+          let point = d3.bisector(function(d) {
+            return (d as TimingPoint).startTimeMs;
           });
           let closest = point.left(this.data, time, 1);
           if (closest > 0 && closest < this.data.length) {

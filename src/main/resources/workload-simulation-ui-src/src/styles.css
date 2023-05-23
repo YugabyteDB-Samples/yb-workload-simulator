@@ -2,7 +2,7 @@
 @charset "UTF-8";
 
 body {
-	background-color: black;
+	background-color: white;
 	color: white;
 	box-sizing: border-box;
 }
@@ -51,16 +51,16 @@ body {
 }
 
 .chartTile {
-	fill: white;
-	stroke: white;
+	fill: black;
+	stroke: black;
 }
 
 .xLabel {
-	fill: white;
+	fill: black;
 }
 
 .data.line {
-	stroke: yellow;
+	stroke: darkgreen;
 	fill: none;
 	stroke-width: 3;
 }
@@ -72,7 +72,7 @@ body {
 }
 
 .data.lineMin {
-	stroke: lightblue;
+	stroke: darkblue;
 	fill: none;
 	stroke-width: 2;
 }
@@ -84,7 +84,7 @@ body {
 }
 
 .tick line {
-	stroke: #FFF;
+	stroke: black;
 	opacity: 25%;
 }
 
@@ -112,7 +112,7 @@ body {
 
 .tooltip {
 	fill: white;
-	stroke: #000;
+	stroke: lightgoldenrodyellow;
 }
 
 .tooltip-date, .tooltip-likes {
@@ -128,19 +128,23 @@ figure {
 }
 
 .p-panel .p-panel-header {
-	background-color: rgb(24, 24, 168) !important;
+	background-color: #23395d !important;
+}
+
+.p-panel .p-panel-content {
+  background-color: floralwhite !important;
 }
 
 .server {
-    fill: black;
+    fill: lightyellow;
 }
 
 .server.master {
-	fill: #333;
+	fill: lightyellow;
 }
 
 .server.selected {
-    fill: blue !important;
+    fill: lightcoral !important;
 }
 
 .server .master-label {
