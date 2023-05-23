@@ -98,12 +98,26 @@ public class FixedTargetWorkloadType extends WorkloadType {
 		private final long timeRemainingInMs;
 		private final long completed;
 		private final long target;
+		private final long throughput;
+		private final double avgLatency;
+
 		public FixedTargetTimerResult(TimerResult orig, double percentageComplete, long timeRemainingInMs, long completed, long target) {
 			super(orig);
 			this.percentageComplete = percentageComplete;
 			this.timeRemainingInMs = timeRemainingInMs;
 			this.completed = completed;
 			this.target = target;
+
+			if(orig != null){
+				this.throughput = orig.getNumSucceeded()+orig.getNumFailed();
+				this.avgLatency = orig.getAvgUs();
+			}
+			else{
+				this.throughput = 0;
+				this.avgLatency = 0;
+			}
+
+//			System.out.println("orig.getNumSucceeded():"+orig.getNumSucceeded()+",orig.getAvgUs():["+orig.getAvgUs()+"]");
 		}
 		
 		public double getPercentageComplete() {
@@ -119,6 +133,14 @@ public class FixedTargetWorkloadType extends WorkloadType {
 		}
 		public long getTarget() {
 			return target;
+		}
+
+		public long getThroughput() {
+			return throughput;
+		}
+
+		public double getAvgLatency() {
+			return avgLatency;
 		}
 	}
 	

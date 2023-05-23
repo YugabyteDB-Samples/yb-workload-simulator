@@ -43,7 +43,7 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
   private height = 0;
   private simulation : any;
   private colorMap : any;
-  private currentNodes  : NetworkNode[] = []; 
+  private currentNodes  : NetworkNode[] = [];
   private timer : any;
   scaleClusterDialogVisible = false;
 
@@ -59,7 +59,7 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
   missingNodes : YBServerModel[] = [];
   networkGraphRefreshInProgress = false;
   resetGraphOnNextCall = false;
-  
+
   @Input()
   yugabyteOffering = 'Yugabyte DB';
 
@@ -73,7 +73,7 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
     private ybServer : YugabyteDataSourceService,
     private confirmService : ConfirmationService,
     private messageService : MessageService
-  ) { 
+  ) {
   }
 
   ngOnInit(): void {
@@ -109,7 +109,7 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
       this.restartServerMonitor(changes.graphRefreshMs.currentValue);
     }
   }
-  
+
   private restartServerMonitor(refreshTime : number) {
     if (this.timer) {
       clearInterval(this.timer);
@@ -129,7 +129,7 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
       }
     },refreshTime);
   }
-  
+
   private createSvg() : void {
     this.svg = d3.select("figure#network")
       .append("svg")
@@ -166,7 +166,7 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
         }
         regions.push(region);
         allNodes.push(region);
-        
+
       }
 
       if (!zones.find(node => node.id == thisNode.zone)) {
@@ -177,11 +177,11 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
       }
 
       allNodes.push({
-        id: thisNode.host, 
-        type: NodeType.NODE, 
-        nodeUp : thisNode.nodeUp, 
-        master : thisNode.master, 
-        tserver : thisNode.tserver, 
+        id: thisNode.host,
+        type: NodeType.NODE,
+        nodeUp : thisNode.nodeUp,
+        master : thisNode.master,
+        tserver : thisNode.tserver,
         readReplica : thisNode.readReplica
       });
       this.nodeCount++;
@@ -321,7 +321,7 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
 
   private deselectAll() {
     d3.selectAll(".server").classed("selected", false);
-    this.selectedItems = [];   
+    this.selectedItems = [];
     this.selectedNodesChanged();
   }
 
@@ -358,7 +358,7 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
     path.closePath();
 
     let centerX = -width/2 + width/5;
-    let centerY = yOffset + height/2; 
+    let centerY = yOffset + height/2;
     path.moveTo( centerX+ radius, centerY);
     path.arc(centerX, centerY, radius, 0, Math.PI, false);
     path.arc(centerX, centerY, radius, Math.PI, 2*Math.PI, false);
@@ -384,13 +384,13 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
       .force("link", d3.forceLink().id(function(d) { return (d as any).id; }))
       .force("charge", d3.forceManyBody())
       .force("center", d3.forceCenter(this.width / 2, this.height / 2));
-      
+
     var link = this.rootElement.append("g")
       .attr("class", "links")
       .selectAll("line")
       .data(this.graphLinks)
       .enter().append("line")
-      .attr("stroke", "white")
+      .attr("stroke", "black")
       .attr("stroke-width", function(d: { value: number; }) { return (d.value); });
 
     var node = this.rootElement.append("g")
@@ -424,13 +424,13 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
           .on("click", (d:any) => {this.click(d)});
         computers.append("path")
           .attr("d", this.formComputerImage())
-          .attr("stroke", "white")
+          .attr("stroke", "black")
           .attr("stroke-width", 3);
         computers.append("text")
           .attr('class', 'master-label')
           .text("Master")
           .attr("dy", -15)
-          .attr('fill', 'white')
+          .attr('fill', 'black')
           .attr('font-size', 'small')
           .attr('text-anchor', 'middle');
 
@@ -441,21 +441,21 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
       .attr("class", (d: NetworkNode) => d.type)
       .attr("r", (d: NetworkNode) => { return this.nodeRadius(d);})
       .attr("fill", (d: NetworkNode) => { return this.nodeColor(d);});
-    
+
     var labels = node.append("text")
       .text(function(d: { id: any; }) { return d.id;})
       .attr('dy', (d:NetworkNode) => d.type == NodeType.NODE ? 22 : 0)
-      .attr('fill', 'white')
+      .attr('fill', 'black')
       .attr('font-size', (d: NetworkNode) => { return this.nodeFontSize(d);})
       .attr('text-anchor', 'middle');
-  
+
     node.append("title")
       .text(function(d: { id: any; }) { return d.id; });
     node.exit().remove();
     this.simulation
       .nodes(this.graphNodes)
       .on("tick", ticked);
-  
+
     let x = this.simulation
       .force("charge", d3.forceManyBody().strength(-800))
       .force("link");
@@ -469,7 +469,7 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
           .attr("y1", function(d: { source: { y: number; }; }) { return d.source.y; })
           .attr("x2", function(d: { target: { x: number; }; }) { return d.target.x; })
           .attr("y2", function(d: { target: { y: number; }; }) { return d.target.y; });
-  
+
       node
           .attr("transform", function(d: { x: number; y: number; }) {
             return "translate(" + d.x + "," + d.y + ")";
@@ -496,7 +496,7 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
         this.ybServer.restartNodes().subscribe(result => {
           console.log(result);
           this.messageService.add({severity:'info', summary:'Success', detail:'Successfully requested nodes to be restarted', key: 'tc'});
-        }, 
+        },
         error => {
           console.log("error restarting nodes", error);
           let errorMessage = "";
@@ -508,10 +508,10 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
             }
           }
           this.messageService.add({
-            sticky: true, 
-            severity:'error', 
-            summary:'Error restarting node(s)', 
-            detail:'An error occurred submitting the request. The error returned was: ' + errorMessage, 
+            sticky: true,
+            severity:'error',
+            summary:'Error restarting node(s)',
+            detail:'An error occurred submitting the request. The error returned was: ' + errorMessage,
             key: 'tc'});
         }) ;
       },
@@ -523,7 +523,7 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
 
   confirmStopNodes() {
     let message = `Are you sure that you want to stop ${this.selectedItems.length} selected node`;
-    message = message + (this.selectedItems.length == 1 ? '?' : 's?'); 
+    message = message + (this.selectedItems.length == 1 ? '?' : 's?');
     this.confirmService.confirm({
       message: message,
       header: 'Confirmation',
@@ -534,7 +534,7 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
         this.ybServer.stopNodes(nodeIds).subscribe(result => {
           console.log(result);
           this.messageService.add({severity:'info', summary:'Success', detail:'Successfully requested nodes to be stopped', key: 'tc'});
-        }, 
+        },
         error => {
           console.log("error stopping nodes " + nodeIds, error);
           let errorMessage = "";
@@ -546,10 +546,10 @@ export class NetworkDiagramComponent implements OnInit, AfterViewInit, OnChanges
             }
           }
           this.messageService.add({
-            sticky: true, 
-            severity:'error', 
-            summary:'Error stopping node(s)', 
-            detail:'An error occurred submitting the request. The error returned was: ' + errorMessage, 
+            sticky: true,
+            severity:'error',
+            summary:'Error stopping node(s)',
+            detail:'An error occurred submitting the request. The error returned was: ' + errorMessage,
             key: 'tc'});
         }) ;
       },
