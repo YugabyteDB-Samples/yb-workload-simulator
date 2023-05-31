@@ -102,14 +102,7 @@ To run the application locally, do the following:
 
 1. To view the application UI, navigate to `http://localhost:8080`.
 
-    Additional parameters for YugabyteDB Managed to start/stop nodes and scale cluster from simulation application UI are as follows:
-
-    ```sh
-    -Dybm-account-id=<YBM Account Id>
-    -Dybm-api-key=<YBM API Key>
-    -Dybm-project-id=<YBM Project Id>
-    -Dybm-cluster-id=<YBM Cluster Id>
-    ```
+    Additional parameters for YugabyteDB Managed to start/stop nodes and scale cluster can be provided in UI by clicking settings gear option on right hand side.
 
 ## Code setup and Installation
 
@@ -132,6 +125,7 @@ A jar file gets created at : <yb-workload-sim>/target/yb-workload-simulator.jar.
 -Dspring.data.cassandra.local-datacenter=<datacenter> [ex. us-east-2 ]
 -Dspring.data.cassandra.userid=cassandra
 -Dspring.data.cassandra.password=<cassandra-password>
+-Dspring.data.cassandra.sslcertpath=<path-to-root-cert> [ex. /Users/username/root.crt]  
 ```
 
 ## How to build your own workload
