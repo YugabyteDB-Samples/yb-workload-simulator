@@ -28,6 +28,7 @@ spring:
       contact-points: ${node_c:127.0.0.1}
       userid: ${userid_c:cassandra}
       password: ${password_c:yugabyte}
+      sslcertpath: ${sslcertpath_c:NA}
 
 logging.level:
   root: ERROR

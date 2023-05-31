@@ -3,6 +3,7 @@ package com.yugabyte.simulation.workload;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.CqlSessionBuilder;
+import com.yugabyte.simulation.util.SSLContextUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 
@@ -51,6 +52,7 @@ public abstract class WorkloadSimulationBase {
 			int port = Integer.parseInt(env.getProperty("spring.data.cassandra.port"));
 			String datacenter = env.getProperty("spring.data.cassandra.local-datacenter");
 			String contactPoints = env.getProperty("spring.data.cassandra.contact-points");
+			String sslRootCertPath = env.getProperty("spring.data.cassandra.sslcertpath");
 
 			CqlSessionBuilder builder = CqlSession.builder();
 			builder.addContactPoints(Arrays.stream(contactPoints.split(","))
@@ -60,6 +62,11 @@ public abstract class WorkloadSimulationBase {
 			if(userId != null){
 				builder.withAuthCredentials(userId,password);
 			}
+
+			if(sslRootCertPath != null && !sslRootCertPath.equals("NA")){
+				builder.withSslContext(SSLContextUtility.createSSLHandler(sslRootCertPath));
+			}
+
 
 			cassandra_session = builder.build();
 		}
