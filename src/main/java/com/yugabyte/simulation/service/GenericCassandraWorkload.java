@@ -87,9 +87,8 @@ public class GenericCassandraWorkload extends WorkloadSimulationBase implements 
     private enum WorkloadType {
         CREATE_TABLES,
         SEED_DATA,
-        RUN_SIMULATION,
-        RUN_LIKE_QUERY_ON_GENERIC2,
-        RUN_LIKE_QUERY_ON_GENERIC3
+        RUN_SIMULATION_FIXED_WORKLOAD,
+        RUN_SIMULATION
     }
 
     private final FixedStepsWorkloadType createTablesWorkloadType;
@@ -120,25 +119,36 @@ public class GenericCassandraWorkload extends WorkloadSimulationBase implements 
     private WorkloadDesc seedingWorkload = new WorkloadDesc(
             GenericCassandraWorkload.WorkloadType.SEED_DATA.toString(),
             "Seed Data",
-            "Load data into the 3 tables (Latency on charts will show cumulative value for 3 inserts)",
+            "Populate new data into the table",
             new WorkloadParamDesc("Items to generate:", 1, Integer.MAX_VALUE, 1000),
             new WorkloadParamDesc("Threads", 1, 500, 32)
     );
 
     private WorkloadDesc runningWorkload = new WorkloadDesc(
             GenericCassandraWorkload.WorkloadType.RUN_SIMULATION.toString(),
-            "Simulation",
-            "Run a simulation of a reads from 3 tables (Latency on charts will show cumulative value for 3 selects and 3 inserts)",
+            "Simulation - TPS",
+            "Run a simulation of point reads and inserts",
             new WorkloadParamDesc("Throughput (tps)", 1, 1000000, 500),
             new WorkloadParamDesc("Max Threads", 1, 500, 64),
-            new WorkloadParamDesc("Include new Inserts (to 3 tables)", false)
+            new WorkloadParamDesc("Include new Inserts", false)
     );
+
+    private WorkloadDesc simulationFixedWorkload = new WorkloadDesc(
+            GenericCassandraWorkload.WorkloadType.RUN_SIMULATION_FIXED_WORKLOAD.toString(),
+            "Simulation",
+            "Run a simulation of point reads and inserts",
+            new WorkloadParamDesc("Invocations", 1, 10000000, 1000000),
+            new WorkloadParamDesc("Max Threads", 1, 500, 64),
+            new WorkloadParamDesc("Include new inserts", false)
+    );
+
 
     @Override
     public List<WorkloadDesc> getWorkloads() {
         return Arrays.asList(
                 createTablesWorkload
                 , seedingWorkload
+                , simulationFixedWorkload
                 , runningWorkload
         );
     }
@@ -160,6 +170,9 @@ public class GenericCassandraWorkload extends WorkloadSimulationBase implements 
                 case RUN_SIMULATION:
                     this.runSimulation(values[0].getIntValue(), values[1].getIntValue(), values[2].getBoolValue());
                     return new InvocationResult("Ok");
+                case RUN_SIMULATION_FIXED_WORKLOAD:
+                    this.runSimulationFixedWorkload(values);
+                    return new InvocationResult("Ok");
             }
             throw new IllegalArgumentException("Unknown workload "+ workloadId);
         }
@@ -177,21 +190,7 @@ public class GenericCassandraWorkload extends WorkloadSimulationBase implements 
                 .createInstance(serviceManager)
                 .execute(threads, numberToGenerate, (customData, threadData) -> {
                     runInserts();
-                    UUID uuid = LoadGeneratorUtils.getUUID();
-                    CqlSession session = this.getCassandraClient();
-                    PreparedStatement ps = session.prepare(INSERT_RECORD_GENERIC1);
-                    //ps.bind(uuid,LoadGeneratorUtils.getName());
-                    session.execute(ps.bind(uuid,LoadGeneratorUtils.getName()));
 
-//                    jdbcTemplate.update(INSERT_RECORD_GENERIC2,
-//                            uuid,
-//                            LoadGeneratorUtils.getAlphaString(LoadGeneratorUtils.getInt(1,30))
-//                    );
-//                    jdbcTemplate.update(INSERT_RECORD_GENERIC3,
-//                            uuid,
-//                            LoadGeneratorUtils.getAlphaString(LoadGeneratorUtils.getInt(1,255)),
-//                            LoadGeneratorUtils.getAlphaString(LoadGeneratorUtils.getInt(1,30))
-//                    );
                     return threadData;
                 });
     }
@@ -207,6 +206,27 @@ public class GenericCassandraWorkload extends WorkloadSimulationBase implements 
         return results;
     }
 
+    private void runSimulationFixedWorkload(ParamValue[] values) {
+        int numOfInvocations = values[0].getIntValue();
+        int maxThreads = values[1].getIntValue();
+        boolean runInserts = values[2].getBoolValue();
+        System.out.println("**** Preloading data...");
+        final List<UUID> uuids = getQueryList();
+        System.out.println("**** Preloading complete...");
+        Random random = ThreadLocalRandom.current();
+        seedingWorkloadType
+                .createInstance(serviceManager)
+                .execute(maxThreads, numOfInvocations, (customData, threadData) -> {
+                    UUID id = uuids.get(random.nextInt(uuids.size()));
+                    runPointReadgeneric1(id);
+                    runPointReadgeneric2(id);
+                    runPointReadgeneric3(id);
+                    if(runInserts){
+                        runInserts();
+                    }
+                    return threadData;
+                });
+    }
 
     private void runSimulation(int tps, int maxThreads, boolean runInserts) {
         System.out.println("**** Preloading data...");
@@ -240,7 +260,7 @@ public class GenericCassandraWorkload extends WorkloadSimulationBase implements 
         for (Row row : rs) {
             // process the row
             int count = 0;
-            System.out.println(row.getUuid("pkid")+","+row.getString("col1"));
+//            System.out.println(row.getUuid("pkid")+","+row.getString("col1"));
         }
     }
 
@@ -256,7 +276,10 @@ public class GenericCassandraWorkload extends WorkloadSimulationBase implements 
 
     private void runInserts(){
         UUID uuid = LoadGeneratorUtils.getUUID();
-        // TODO
+        CqlSession session = this.getCassandraClient();
+        PreparedStatement ps = session.prepare(INSERT_RECORD_GENERIC1);
+        //ps.bind(uuid,LoadGeneratorUtils.getName());
+        session.execute(ps.bind(uuid,LoadGeneratorUtils.getName()));
     }
 
 
