@@ -11,6 +11,7 @@ import com.yugabyte.simulation.dao.WorkloadParamDesc;
 import com.yugabyte.simulation.services.ServiceManager;
 import com.yugabyte.simulation.workload.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
@@ -198,11 +199,25 @@ public class GenericCassandraWorkload extends WorkloadSimulationBase implements 
     private List<UUID> getQueryList() {
         List<UUID> results = new ArrayList<UUID>(ROWS_TO_PRELOAD);
         CqlSession session = this.getCassandraClient();
-        PreparedStatement ps = session.prepare("select pkid from  workload_demo.c_generic1 limit "+ROWS_TO_PRELOAD+";");
-        ResultSet rs = session.execute(ps.bind());
-        for(Row row : rs){
-            results.add(row.getUuid("pkid"));
+        int numOfRanges = 64;
+        int limit = ROWS_TO_PRELOAD/numOfRanges;
+        int runningHashCodeVal = 0;
+
+        while(runningHashCodeVal < 65536){
+            int nextHashVal = runningHashCodeVal + 1024;
+            String query = " SELECT pkid FROM workload_demo.c_generic1 where partition_hash(pkid) >= "+runningHashCodeVal+" and partition_hash(pkid) < "+(nextHashVal-1)+" LIMIT "+limit+" ";
+            System.out.println("query:"+query);
+            ResultSet rs = session.execute(query.toString());
+            for(Row row : rs){
+                results.add(row.getUuid("pkid"));
+            }
+            runningHashCodeVal = nextHashVal;
         }
+//        System.out.println("list of pkids:"+results.size());
+//        for(UUID pkId: results){
+//            System.out.print(pkId.toString()+",");
+//        }
+
         return results;
     }
 
