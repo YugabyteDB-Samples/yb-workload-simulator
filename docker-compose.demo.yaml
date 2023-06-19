@@ -158,9 +158,7 @@ services:
       retries: 10
 
   app:
-    build:
-      context: .
-      dockerfile: demo.Dockerfile
+    image: ghcr.io/yogendra/yb-workload-simu-app
     container_name: app
     hostname: app
     environment:
