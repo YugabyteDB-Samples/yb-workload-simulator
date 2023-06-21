@@ -10,6 +10,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
@@ -26,10 +27,13 @@ public class NewFormatWorkload extends WorkloadSimulationBase implements Workloa
 
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
-	
+
+	@Value("${SPRING_APPLICATION_NAME:}")
+	private String applicationName;
+
 	@Override
 	public String getName() {
-		return "New Format Workload";
+		return "New Format Workload"+ ((applicationName != null && !applicationName.equals(""))? " ["+applicationName+"]" : "");
 	}
 	
 	// We need to call a Bean from a Bean so the AOP works.

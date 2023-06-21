@@ -4,6 +4,7 @@ import com.yugabyte.simulation.dao.*;
 import com.yugabyte.simulation.services.ServiceManager;
 import com.yugabyte.simulation.workload.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.stereotype.Repository;
@@ -23,9 +24,12 @@ public class GenericWorkload extends WorkloadSimulationBase implements WorkloadS
     @Autowired
     private ServiceManager serviceManager;
 
+    @Value("${SPRING_APPLICATION_NAME:}")
+    private String applicationName;
+
 	@Override
 	public String getName() {
-		return "Generic";
+		return "Generic" + ((applicationName != null && !applicationName.equals(""))? " ["+applicationName+"]" : "");
 	}
 
     private static final String CREATE_GENERIC1 = "create table if not exists generic1(\n" +

@@ -11,6 +11,7 @@ import com.yugabyte.simulation.dao.WorkloadParamDesc;
 import com.yugabyte.simulation.services.ServiceManager;
 import com.yugabyte.simulation.workload.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.stereotype.Repository;
 
@@ -38,9 +39,12 @@ public class GenericCassandraWorkload extends WorkloadSimulationBase implements 
     @Autowired
     private ServiceManager serviceManager;
 
+    @Value("${SPRING_APPLICATION_NAME:}")
+    private String applicationName;
+
     @Override
     public String getName() {
-        return "Generic YCQL";
+        return "Generic YCQL"+ ((applicationName != null && !applicationName.equals(""))? " ["+applicationName+"]" : "");
     }
 
 
