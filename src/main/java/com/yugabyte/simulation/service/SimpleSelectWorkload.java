@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.stereotype.Repository;
@@ -30,10 +31,14 @@ public class SimpleSelectWorkload extends WorkloadSimulationBase implements Work
 	
 	@Autowired 
 	private ServiceManager serviceManager;
-	
+
+	@Value("${SPRING_APPLICATION_NAME:}")
+	private String applicationName;
+
 	@Override
 	public String getName() {
-		return "Simple Select";
+
+		return "Simple Select"+ ((applicationName != null && !applicationName.equals(""))? " ["+applicationName+"]" : "");
 	}
 
 	private static final String CREATE_TABLE =

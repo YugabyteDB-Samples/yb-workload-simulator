@@ -1,5 +1,7 @@
 spring:
   workload: ${workload:genericWorkload}
+  application:
+    name: ${SPRING_APPLICATION_NAME:}
   jpa:
     open-in-view: false
   flyway:

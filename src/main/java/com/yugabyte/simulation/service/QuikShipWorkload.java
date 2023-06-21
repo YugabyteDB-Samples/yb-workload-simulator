@@ -8,6 +8,7 @@ import com.yugabyte.simulation.services.ServiceManager;
 import com.yugabyte.simulation.util.QuikShipWorkloadUtil;
 import com.yugabyte.simulation.workload.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.stereotype.Repository;
@@ -28,9 +29,13 @@ public class QuikShipWorkload extends WorkloadSimulationBase implements Workload
     @Autowired
     private ServiceManager serviceManager;
 
+    @Value("${SPRING_APPLICATION_NAME:}")
+    private String applicationName;
+
+
     @Override
     public String getName() {
-        return "QuikShip";
+        return "QuikShip"+ ((applicationName != null && !applicationName.equals(""))? " ["+applicationName+"]" : "");
     }
 
     private static final String CREATE_PRODUCT_TYPE = "CREATE TYPE  product_type_enum AS ENUM ('book', 'technology');";
