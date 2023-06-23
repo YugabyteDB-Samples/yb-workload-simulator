@@ -37,5 +37,5 @@ jobs:
           retention-days: 1
       - uses: google-github-actions/release-please-action@v3
         with:
-          release-type: java-maven
+          release-type: maven
           package-name: release-please-action
