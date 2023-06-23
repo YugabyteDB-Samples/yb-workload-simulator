@@ -14,9 +14,12 @@ on:
   pull_request:
     branches: [ "main" ]
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   build:
-
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -24,6 +27,7 @@ jobs:
         with:
           java-version: '11'
           distribution: 'temurin'
+          cache: 'maven'
       - run: mvn clean package -DskipTests
       - run: mkdir staging && cp target/*.jar staging
       - uses: actions/upload-artifact@v3
@@ -31,3 +35,7 @@ jobs:
           name: Package
           path: staging
           retention-days: 1
+      - uses: google-github-actions/release-please-action@v3
+        with:
+          release-type: java-maven
+          package-name: release-please-action

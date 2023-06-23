@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.yugabyte</groupId>
 	<artifactId>yb-workload-simulator</artifactId>
-	<version>0.0.3</version>
+	<version>0.0.6</version>
 	<name>yb-workload-simulator</name>
 	<description>YugabyteDB Workload Simulation Demo App</description>
 	<properties>
