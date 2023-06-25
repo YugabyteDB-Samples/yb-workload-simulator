@@ -10,9 +10,8 @@ name: Java CI with Maven
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    tags:
+      - "v*"
 
 permissions:
   contents: write
@@ -38,7 +37,7 @@ jobs:
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.ACTEST }}"
-          automatic_release_tag: "latest"
+#          automatic_release_tag: "latest"
           prerelease: true
           title: "Development Build"
           files: staging/*.jar
