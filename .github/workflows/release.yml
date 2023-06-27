@@ -1,8 +1,12 @@
-name: Java CI Create and Upload Release
+name: Java CI to create and upload release on pull request
 on:
   push:
-    tags:
-      - "v*"
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  build-number: ${GITHUB_RUN_NUMBER}
 
 jobs:
   build:
@@ -15,16 +19,16 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
       - run: mvn clean package -DskipTests
-      - run: mkdir staging && cp target/*.jar staging
+      - run: mkdir staging && mv target/yb-workload-sim.jar target/yb-workload-sim-${{ env.build-number }}.jar && cp target/*.jar staging
       - uses: actions/upload-artifact@v3
         with:
           name: Package
           path: staging
           retention-days: 1
-      - uses: "marvinpinto/action-automatic-releases@latest"
+      - uses: marvinpinto/action-automatic-releases@latest
         with:
           repo_token: "${{ secrets.ACTEST }}"
-          #          automatic_release_tag: "latest"
+          automatic_release_tag: "${{ github.run_number }}"
+          title: "Automated Build ${{ github.run_number }}"
           prerelease: true
-          title: "Development Build"
           files: staging/*.jar
