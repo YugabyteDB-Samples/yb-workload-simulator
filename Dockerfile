@@ -5,7 +5,7 @@ ENV container=yb-workload-simu-app
 WORKDIR /opt/yugabyte
 
 ARG JAR_FILE
-ADD target/${JAR_FILE} /opt/yugabyte/yb-workload-simu-app.jar
+ADD target/yb-workload-sim.jar /opt/yugabyte/yb-workload-sim.jar
 
 #ENTRYPOINT ["/usr/bin/java", "-jar", "/opt/yugabyte/yb-workload-simu-app.jar"]
-ENTRYPOINT ["sh", "-c", "java ${JAVA_OPTS} -jar /opt/yugabyte/yb-workload-simu-app.jar"]
+ENTRYPOINT ["sh", "-c", "java ${JAVA_OPTS} -jar /opt/yugabyte/yb-workload-sim.jar"]

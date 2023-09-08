@@ -1,5 +1,5 @@
 spring:
-  workload: ${workload:genericWorkload}
+  workload: ${workload:quikShipWorkload}
   application:
     name: ${SPRING_APPLICATION_NAME:}
   jpa:
