@@ -35,4 +35,9 @@ public class WorkloadConfig {
     public WorkloadSimulation quikShipWorkload(){
         return new QuikShipWorkload();
     }
+
+    @Bean(name="QconWorkload")
+    public WorkloadSimulation qconWorkload(){
+        return new QconWorkload();
+    }
 }
