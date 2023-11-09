@@ -1,6 +1,8 @@
 package com.yugabyte.simulation.services;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -70,6 +72,11 @@ public class TimerService {
 		final Map<Integer, String> resultsReverseOrdinals;
 		final Map<String, WorkloadTypeInstance> workloadMap;
 		final List<TimingInstancePerSecond>[] timings;
+
+		private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+
+
+
 //		long[][] currentSuccesses;
 //		long[][] currentFailures;
 //		int[] successCount;
@@ -200,9 +207,13 @@ public class TimerService {
 				
 				timingsToAnalyze.currentFailuresCount = 0;
 				timingsToAnalyze.currentSuccessesCount = 0;
+
+				Date currentDate = new Date(now);
+				String currentTimeStr = dateFormat.format(currentDate);
 				
 				if (result.getNumFailed() + result.getNumSucceeded() > 0) {
-					System.out.printf("%,dms: %s: %s", 
+					System.out.printf("[%s] %,dms: %s: %s",
+							currentTimeStr,
 							now - startTime,
 							workloadId,
 							result.toString());
