@@ -10,7 +10,7 @@ spring:
     hikari:
       username: ${dbuser:yugabyte}
       password: ${dbpassword:yugabyte}
-      connection-init-sql: 'set yb_read_from_followers to true;'
+      connection-init-sql: 'set statement_timeout=10000;'
       maximumPoolSize: ${max-pool-size:10}
       maxLifeTime: ${max-life-time:600000}
       data-source-class-name: com.yugabyte.ysql.YBClusterAwareDataSource

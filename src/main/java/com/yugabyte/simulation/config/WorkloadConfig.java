@@ -40,4 +40,9 @@ public class WorkloadConfig {
     public WorkloadSimulation qconWorkload(){
         return new QconWorkload();
     }
+
+    @Bean(name="RetryExampleWorkload")
+    public WorkloadSimulation retryExampleWorkload(){
+        return new RetryExampleWorkload();
+    }
 }
