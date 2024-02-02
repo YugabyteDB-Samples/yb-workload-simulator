@@ -27,7 +27,7 @@ public class RetryConfig {
     // 08006 - connection issues
     // 57P01 - broken pool conn (invalidated connections because of node failure, etc.)
     // XX000 - other connection related issues (not classified) <- removed as not explicitly retryable
-    private static final Pattern SQL_STATE_PATTERN = Pattern.compile("^(40001)|(40P01)|(57P01)|(08006)");
+    private static final Pattern SQL_STATE_PATTERN = Pattern.compile("^(40001)|(40P01)|(57P01)|(08006)|(XX000)|(42804)");
 
     /**
      * Configures a Spring Retry Backoff policy based on a randomized exponential backoff.
@@ -87,8 +87,12 @@ public class RetryConfig {
                     return simpleRetryPolicy;
                 } else if (classifiable instanceof SQLException ) {
                     SQLException ex = (SQLException) classifiable;
+                    System.out.println("SQLState: " + ex.getSQLState() + " ErrorCode: " + ex.getErrorCode() + " Message: " + ex.getMessage());
                     // assumes SQLState is only populated with state codes
                     if (ex.getSQLState() != null && SQL_STATE_PATTERN.matcher(ex.getSQLState()).matches()) {
+                        return simpleRetryPolicy;
+                    }
+                    else if(ex.getSQLState() == null){
                         return simpleRetryPolicy;
                     }
                 }

@@ -15,7 +15,13 @@ import org.springframework.retry.interceptor.RetryOperationsInterceptor;
 import org.springframework.retry.support.RetrySynchronizationManager;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -42,6 +48,12 @@ public class RetryExampleWorkload extends WorkloadSimulationBase implements Work
 
     @Autowired
     private RetryOperationsInterceptor ysqlRetryInterceptor;
+
+    @Autowired
+    private  TransactionTemplate transactionTemplate;
+
+    @Autowired
+    private PlatformTransactionManager txManager;
 
 
     @Override
@@ -87,14 +99,14 @@ public class RetryExampleWorkload extends WorkloadSimulationBase implements Work
         SEED_DATA,
         RUN_SIMULATION_FIXED_WORKLOAD,
         RUN_SIMULATION,
-        UPDATE_DATA
+        RETRY_AND_TRANSACTION_TEMPLATE
     }
 
     private final FixedStepsWorkloadType createTablesWorkloadType;
     private final FixedTargetWorkloadType seedingWorkloadType;
     private final ThroughputWorkloadType runInstanceType;
     private final FixedTargetWorkloadType simulationFixedWorkloadType;
-    private final FixedTargetWorkloadType updateFixedWorkloadType;
+    private final FixedTargetWorkloadType retryWithTransactionTemplateFixedWorkloadType;
 
     public RetryExampleWorkload() {
         this.createTablesWorkloadType = new FixedStepsWorkloadType(
@@ -110,7 +122,7 @@ public class RetryExampleWorkload extends WorkloadSimulationBase implements Work
         this.seedingWorkloadType = new FixedTargetWorkloadType();
         this.runInstanceType = new ThroughputWorkloadType();
         this.simulationFixedWorkloadType = new FixedTargetWorkloadType();
-        this.updateFixedWorkloadType = new FixedTargetWorkloadType();
+        this.retryWithTransactionTemplateFixedWorkloadType = new FixedTargetWorkloadType();
     }
 
     private WorkloadDesc createTablesWorkload = new WorkloadDesc(
@@ -145,12 +157,13 @@ public class RetryExampleWorkload extends WorkloadSimulationBase implements Work
             new WorkloadParamDesc("Include placing of new orders (inserts)", false)
     );
 
-    private WorkloadDesc updateWorkload = new WorkloadDesc(
-            WorkloadType.UPDATE_DATA.toString(),
-            "Update Data",
-            "Update the orders table",
+    private WorkloadDesc RetryAndTransactionTemplateWorkload = new WorkloadDesc(
+            WorkloadType.RETRY_AND_TRANSACTION_TEMPLATE.toString(),
+            "Test Retries on Transactions",
+            "This example demonstrates handling retries and transactions using different springboot options.",
             new WorkloadParamDesc("Invocations", 1, Integer.MAX_VALUE, 1000000),
-            new WorkloadParamDesc("Max Threads", 1, Integer.MAX_VALUE, 64)
+            new WorkloadParamDesc("Max Threads", 1, Integer.MAX_VALUE, 64),
+            new WorkloadParamDesc("Test Type", 0,new String[]{"RetryTemplateWithTransactionTemplate", "RetryWithTransactionalAnnotation","RetryWithTrxManager"})
     );
 
 
@@ -159,9 +172,10 @@ public class RetryExampleWorkload extends WorkloadSimulationBase implements Work
         return Arrays.asList(
                 createTablesWorkload
                 , seedingWorkload
+                , RetryAndTransactionTemplateWorkload
                 , simulationFixedWorkload
                 , runningWorkload
-                , updateWorkload
+
         );
     }
 
@@ -183,8 +197,8 @@ public class RetryExampleWorkload extends WorkloadSimulationBase implements Work
                 case RUN_SIMULATION_FIXED_WORKLOAD:
                     this.runSimulationFixedWorkload(values);
                     return new InvocationResult("Ok");
-                case UPDATE_DATA:
-                    this.runUpdateWorkload(values);
+                case RETRY_AND_TRANSACTION_TEMPLATE:
+                    this.retryWithTransactionTemplateWorkload(values);
                     return new InvocationResult("Ok");
 
             }
@@ -228,13 +242,22 @@ public class RetryExampleWorkload extends WorkloadSimulationBase implements Work
     }
 
 
-    public void runUpdateWorkload(ParamValue[] values) {
+    public void retryWithTransactionTemplateWorkload(ParamValue[] values) {
         int numOfInvocations = values[0].getIntValue();
         int maxThreads = values[1].getIntValue();
-        updateFixedWorkloadType
+        String testType = values[2].getStringValue();
+        retryWithTransactionTemplateFixedWorkloadType
                 .createInstance(serviceManager)
                 .execute(maxThreads, numOfInvocations, (customData, threadData) -> {
-                    runUpdates();
+                    if(testType.equals("RetryTemplateWithTransactionTemplate")){
+                        execTransactionsWithRetryTemplateAndTransactionTemplate();
+                    }
+                    else if (testType.equals("RetryWithTransactionalAnnotation")){
+                        execTransactionsWithRetryTemplateAndTransactionalAnnotation();
+                    }
+                    else if(testType.equals("RetryWithTrxManager")){
+                        execTranxWithRetryTemplateAndTrxManager();
+                    }
                     return threadData;
                 });
     }
@@ -303,36 +326,135 @@ public class RetryExampleWorkload extends WorkloadSimulationBase implements Work
     }
 
     /**
-     * Executes the 'runUpdates' method, which is annotated with @Transactional for ensuring atomicity.
-     * Generates random IDs and update values for tracking purposes and updating records.
-     * Logs the details of the update operation including IDs and values.
-     * Utilizes a RetryTemplate for handling retry operations, with additional logging for retry occurrences.
-     * Performs two jdbcTemplate updates to modify records in the 'ORDERS' table based on randomly generated IDs and values.
+     * Executes the 'execTransactionsWithRetryTemplateAndTransactionTemplate' method, which uses a RetryTemplate for handling retry operations.
+     * Utiloizes the @Transactional annotation to handle transactional operations.
+     * Transaction consists of three insert operations and one update operation.
      */
+
     @Transactional
-    public void runUpdates() {
+    public void execTransactionsWithRetryTemplateAndTransactionalAnnotation() {
         int id1 = LoadGeneratorUtils.getInt(1, 1000000);
-        int id2 = LoadGeneratorUtils.getInt(1, 1000000);
         double updateVal1 = LoadGeneratorUtils.getDouble(1.00, 1000.00);
-        double updateVal2 = LoadGeneratorUtils.getDouble(1.00, 1000.00);
-        String str = "id:[" + id1 + "]=[" + updateVal1 + "] id:[" + id2 + "]=[" + updateVal2 + "]";
-        System.out.println("@@@@ACTEST ===>>> Going to UPDATE " + str);
+        String str = "id:[" + id1 + "]=[" + updateVal1 + "]";
         retryTemplate.execute(context -> {
             // Check if retry is happening
             if (RetrySynchronizationManager.getContext().getRetryCount() > 0) {
                 System.out.println("@@@@@@@@@@@ACTEST ===>>> RETRY IS HAPPENING:[" + RetrySynchronizationManager.getContext().getRetryCount() + "] " + str);
             }
+            // Your transactional logic here
+            jdbcTemplate.update(INSERT_RECORD_ORDERS,
+                    LoadGeneratorUtils.getDouble(1.00,1000.00),
+                    LoadGeneratorUtils.getText(10,40)
+            );
             jdbcTemplate.update(UPDATE_RECORD_ORDERS,
                     updateVal1,
                     id1
             );
-
-            jdbcTemplate.update(UPDATE_RECORD_ORDERS,
-                    updateVal2,
-                    id2
+            jdbcTemplate.update(INSERT_RECORD_ORDERS,
+                    LoadGeneratorUtils.getDouble(1.00,1000.00),
+                    LoadGeneratorUtils.getText(10,40)
+            );
+            jdbcTemplate.update(INSERT_RECORD_ORDERS,
+                    LoadGeneratorUtils.getDouble(1.00,1000.00),
+                    LoadGeneratorUtils.getText(10,40)
             );
             return null;
         });
-
     }
+
+    /**
+     * Executes the 'execTransactionsWithRetryTemplateAndTransactionTemplate' method, which uses a RetryTemplate for handling retry operations.
+     * Utilizes a TransactionTemplate for ensuring atomicity and a RetryTemplate for handling retry operations, with additional logging for retry occurrences.
+     * Transaction consists of three insert operations and one update operation.
+     */
+    public void execTransactionsWithRetryTemplateAndTransactionTemplate() {
+        UUID uuid = LoadGeneratorUtils.getUUID();// This UUID is not stored in database. It is for logging purpose only to track the retry operation
+        int id1 = LoadGeneratorUtils.getInt(1, 1000000);
+        double updateVal1 = LoadGeneratorUtils.getDouble(1.00, 1000.00);
+        String str = "id:[" + id1 + "]=[" + updateVal1 + "]";
+        retryTemplate.execute(context -> {
+            // Check if retry is happening
+            if (RetrySynchronizationManager.getContext().getRetryCount() > 0) {
+                System.out.println("@@@@@@@@@@@ACTEST ===>>> RETRY IS HAPPENING:[" + RetrySynchronizationManager.getContext().getRetryCount() + "] transaction id:[" + uuid+"] "+str);
+            }
+
+            transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+                protected void doInTransactionWithoutResult(TransactionStatus status) {
+                    try {
+                        // Your transactional logic here
+                        jdbcTemplate.update(INSERT_RECORD_ORDERS,
+                                LoadGeneratorUtils.getDouble(1.00,1000.00),
+                                LoadGeneratorUtils.getText(10,40)
+                        );
+                        jdbcTemplate.update(UPDATE_RECORD_ORDERS,
+                                updateVal1,
+                                id1
+                        );
+                        jdbcTemplate.update(INSERT_RECORD_ORDERS,
+                                LoadGeneratorUtils.getDouble(1.00,1000.00),
+                                LoadGeneratorUtils.getText(10,40)
+                        );
+                        jdbcTemplate.update(INSERT_RECORD_ORDERS,
+                                LoadGeneratorUtils.getDouble(1.00,1000.00),
+                                LoadGeneratorUtils.getText(10,40)
+                        );
+
+                    }
+                    catch (Exception ex) {
+                        System.out.println("@@@ACTEST Going to rollback the transaction");
+                        status.setRollbackOnly();
+                        throw ex;
+                    }
+                }
+            });
+            return null;
+        });
+    }
+
+    public void execTranxWithRetryTemplateAndTrxManager() {
+        UUID uuid = LoadGeneratorUtils.getUUID();// This UUID is not stored in database. It is for logging purpose only to track the retry operation
+        int id1 = LoadGeneratorUtils.getInt(1, 1000000);
+        double updateVal1 = LoadGeneratorUtils.getDouble(1.00, 1000.00);
+        String str = "id:[" + id1 + "]=[" + updateVal1 + "]";
+        retryTemplate.execute(context -> {
+            // Check if retry is happening
+            if (RetrySynchronizationManager.getContext().getRetryCount() > 0) {
+                System.out.println("@@@@@@@@@@@ACTEST ===>>> RETRY IS HAPPENING:[" + RetrySynchronizationManager.getContext().getRetryCount() + "] transaction id:[" + uuid+"] "+str);
+            }
+
+            DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+            // explicitly setting the transaction name is something that can be done only programmatically
+            def.setName("TxnName:"+uuid);
+            def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+
+            TransactionStatus status = txManager.getTransaction(def);
+            try {
+                // Your transactional logic here
+                jdbcTemplate.update(INSERT_RECORD_ORDERS,
+                        LoadGeneratorUtils.getDouble(1.00,1000.00),
+                        LoadGeneratorUtils.getText(10,40)
+                );
+                jdbcTemplate.update(UPDATE_RECORD_ORDERS,
+                        updateVal1,
+                        id1
+                );
+                jdbcTemplate.update(INSERT_RECORD_ORDERS,
+                        LoadGeneratorUtils.getDouble(1.00,1000.00),
+                        LoadGeneratorUtils.getText(10,40)
+                );
+                jdbcTemplate.update(INSERT_RECORD_ORDERS,
+                        LoadGeneratorUtils.getDouble(1.00,1000.00),
+                        LoadGeneratorUtils.getText(10,40)
+                );
+            } catch (Exception ex) {
+                System.out.println("@@@ACTEST Going to rollback the transaction");
+                txManager.rollback(status);
+                throw ex;
+            }
+            txManager.commit(status);
+
+            return null;
+        });
+    }
+
 }
