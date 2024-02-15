@@ -5,9 +5,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("spring.retry")
 public class RetryConfigProperties {
     private int maxAttempts = 3;
-    private int backoffInitialInterval = 2;
-    private int backoffMultiplier = 8;
-    private int backoffMaxInterval = 3000;
+    private int backoffInitialInterval = 3500;
+    private int backoffMultiplier = 3;
+    private int backoffMaxInterval = 30000;
 
     public int getMaxAttempts() {
         return maxAttempts;

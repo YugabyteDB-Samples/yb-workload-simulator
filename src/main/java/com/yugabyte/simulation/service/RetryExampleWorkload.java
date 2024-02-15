@@ -311,11 +311,11 @@ public class RetryExampleWorkload extends WorkloadSimulationBase implements Work
     private void runInserts(){
         UUID uuid = LoadGeneratorUtils.getUUID();
         // This UUID is not stored in database. It is for logging purpose only to track the retry operation
-        System.out.println("@@@@ACTEST ===>>> test:["+uuid+"]");
+//        System.out.println("@@@@ACTEST ===>>> test:["+uuid+"]");
         retryTemplate.execute(context -> {
             // Check if retry is happening
             if (RetrySynchronizationManager.getContext().getRetryCount() > 0) {
-                System.out.println("@@@@@@@@@@@ACTEST ===>>> Retry is happening:["+RetrySynchronizationManager.getContext().getRetryCount()+"] test:["+uuid+"]");
+                System.out.println("<========= RETRY IS HAPPENING =========>:["+RetrySynchronizationManager.getContext().getRetryCount()+"] test:["+uuid+"]");
             }
             jdbcTemplate.update(INSERT_RECORD_ORDERS,
                     LoadGeneratorUtils.getDouble(1.00,1000.00),
@@ -339,7 +339,7 @@ public class RetryExampleWorkload extends WorkloadSimulationBase implements Work
         retryTemplate.execute(context -> {
             // Check if retry is happening
             if (RetrySynchronizationManager.getContext().getRetryCount() > 0) {
-                System.out.println("@@@@@@@@@@@ACTEST ===>>> RETRY IS HAPPENING:[" + RetrySynchronizationManager.getContext().getRetryCount() + "] " + str);
+                System.out.println("<========= RETRY IS HAPPENING =========>:[" + RetrySynchronizationManager.getContext().getRetryCount() + "] " + str);
             }
             // Your transactional logic here
             jdbcTemplate.update(INSERT_RECORD_ORDERS,
@@ -375,7 +375,7 @@ public class RetryExampleWorkload extends WorkloadSimulationBase implements Work
         retryTemplate.execute(context -> {
             // Check if retry is happening
             if (RetrySynchronizationManager.getContext().getRetryCount() > 0) {
-                System.out.println("@@@@@@@@@@@ACTEST ===>>> RETRY IS HAPPENING:[" + RetrySynchronizationManager.getContext().getRetryCount() + "] transaction id:[" + uuid+"] "+str);
+                System.out.println("<========= RETRY IS HAPPENING =========>:[" + RetrySynchronizationManager.getContext().getRetryCount() + "] transaction id:[" + uuid+"] "+str);
             }
 
             transactionTemplate.execute(new TransactionCallbackWithoutResult() {
@@ -401,7 +401,7 @@ public class RetryExampleWorkload extends WorkloadSimulationBase implements Work
 
                     }
                     catch (Exception ex) {
-                        System.out.println("@@@ACTEST Going to rollback the transaction");
+                        System.out.println("<========= Going to rollback the Transaction =========>");
                         status.setRollbackOnly();
                         throw ex;
                     }
@@ -419,7 +419,7 @@ public class RetryExampleWorkload extends WorkloadSimulationBase implements Work
         retryTemplate.execute(context -> {
             // Check if retry is happening
             if (RetrySynchronizationManager.getContext().getRetryCount() > 0) {
-                System.out.println("@@@@@@@@@@@ACTEST ===>>> RETRY IS HAPPENING:[" + RetrySynchronizationManager.getContext().getRetryCount() + "] transaction id:[" + uuid+"] "+str);
+                System.out.println("<========= RETRY IS HAPPENING =========>:[" + RetrySynchronizationManager.getContext().getRetryCount() + "] transaction id:[" + uuid+"] "+str);
             }
 
             DefaultTransactionDefinition def = new DefaultTransactionDefinition();
@@ -447,7 +447,7 @@ public class RetryExampleWorkload extends WorkloadSimulationBase implements Work
                         LoadGeneratorUtils.getText(10,40)
                 );
             } catch (Exception ex) {
-                System.out.println("@@@ACTEST Going to rollback the transaction");
+                System.out.println("<========= Going to rollback the Transaction =========>");
                 txManager.rollback(status);
                 throw ex;
             }
