@@ -45,4 +45,10 @@ public class WorkloadConfig {
     public WorkloadSimulation retryExampleWorkload(){
         return new RetryExampleWorkload();
     }
+
+    @Bean(name="MultiRegionWorkload")
+    public WorkloadSimulation multiRegionWorkload(){
+        return new MultiRegionWorkload();
+    }
+
 }
