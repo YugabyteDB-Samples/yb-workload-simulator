@@ -9,6 +9,22 @@ WITH (
    ]}'
 );
 
+
+-- CREATE TABLESPACE east_tablespace WITH (
+--     replica_placement='{"num_replicas": 3, "placement_blocks":
+-- [{"cloud":"azu","region":"eastus","zone":"eastus-2","min_num_replicas":1,"leader_preference":1},
+-- {"cloud":"azu","region":"southcentralus","zone":"southcentralus-2","min_num_replicas":1,"leader_preference":2},
+-- {"cloud":"azu","region":"westus3","zone":"westus3-1","min_num_replicas":1}]}'
+-- );
+--
+-- CREATE TABLESPACE west_tablespace WITH (
+--     replica_placement='{"num_replicas": 3, "placement_blocks":
+--  [{"cloud":"azu","region":"eastus","zone":"eastus-2","min_num_replicas":1},
+--  {"cloud":"azu","region":"southcentralus","zone":"southcentralus-2","min_num_replicas":1,"leader_preference":2},
+--  {"cloud":"azu","region":"westus3","zone":"westus3-1","min_num_replicas":1, "leader_preference":1}]}'
+-- );
+
+
 CREATE TABLESPACE us_multi_region_tablespace2
 WITH (
     replica_placement = '{"num_replicas": 5, "placement_blocks": [
