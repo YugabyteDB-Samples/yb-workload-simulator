@@ -202,21 +202,9 @@ public class MultiRegionWorkload  extends WorkloadSimulationBase implements Work
 
     private List<UUID> getQueryList(String region) {
         List<UUID> results = new ArrayList<UUID>(ROWS_TO_PRELOAD);
-        int numOfRanges = 64;
-        int limit = ROWS_TO_PRELOAD/numOfRanges;
-        int runningHashCodeVal = 0;
+        int limit = ROWS_TO_PRELOAD;
         StringBuffer sbQuery = new StringBuffer();
-
-        while(runningHashCodeVal < 65536){
-            if(runningHashCodeVal != 0){
-                sbQuery.append(" UNION ALL ");
-            }
-            int nextHashVal = runningHashCodeVal + 1024;
-            sbQuery.append(" (SELECT transaction_id FROM transactions where yb_hash_code(transaction_id) >= "+runningHashCodeVal+" and yb_hash_code(transaction_id) < "+nextHashVal+" and region = '"+region+"' LIMIT "+limit+") ");
-            runningHashCodeVal = nextHashVal;
-        }
-
-
+        sbQuery.append(" (SELECT transaction_id FROM transactions where region = '"+region+"' LIMIT "+limit+") ");
 
         jdbcTemplate.setMaxRows(ROWS_TO_PRELOAD);
         jdbcTemplate.setFetchSize(ROWS_TO_PRELOAD);
