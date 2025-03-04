@@ -73,6 +73,12 @@ To run the application locally, do the following:
     -Dsslrootcert=<certificatepath>
     ```
 
+### Run the application using postgres driver
+By default, workload simulator uses "Yugabyte Smart Driver". You can run the App using "Postgres Driver" by passing following flag:
+```
+-Dspring.profiles.active=pgdriver
+```
+
 ### Run the application on a YugabyteDB Managed cluster
 
 1. To connect the application to your cluster, ensure that you have downloaded the cluster SSL certificate and your computer is added to the IP allow list. Refer to [Before you begin](https://docs.yugabyte.com//preview/develop/build-apps/cloud-add-ip/).

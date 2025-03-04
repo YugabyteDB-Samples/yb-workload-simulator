@@ -1,0 +1,53 @@
+spring:
+  workload: ${workload:quikShipWorkload}
+  application:
+    name: ${SPRING_APPLICATION_NAME:}
+  jpa:
+    open-in-view: false
+  flyway:
+    enabled: false
+  datasource:
+    hikari:
+      username: ${dbuser:yugabyte}
+      password: ${dbpassword:yugabyte}
+      connection-init-sql: 'set statement_timeout=10000;'
+      maximumPoolSize: ${max-pool-size:10}
+      maxLifeTime: ${max-life-time:600000}
+      data-source-class-name: com.yugabyte.ysql.YBClusterAwareDataSource
+      data-source-properties:
+        serverName: ${node:127.0.0.1}
+        portNumber: ${port:5433}
+        databaseName: ${dbname:yugabyte}
+        topologyKeys: "aws.us-west-2.*"
+        #additionalEndpoints: 127.0.0.2:5433,127.0.0.3:5433
+        #ssl: ${ssl:false}
+        #sslmode: ${sslmode:disable}
+        #sslrootcert: ${sslrootcert:~/.ssh/ybcloudcert/root.crt}
+
+  data:
+    cassandra:
+      local-datacenter: ${datacenter_c:DC1}
+      port: ${port_c:9042}
+      contact-points: ${node_c:127.0.0.1}
+      userid: ${userid_c:cassandra}
+      password: ${password_c:yugabyte}
+      sslcertpath: ${sslcertpath_c:NA}
+
+logging.level:
+  root: ERROR
+  java.sql: ERROR
+  com.zaxxer.hikari: TRACE
+  com.yugabyte: ERROR
+  com.yugabyte.simulation.workload: ERROR
+  org.springframework.jdbc.core: ERROR
+
+server:
+  port: 8080
+
+ybm:
+  account-id: ${ybm-account-id:NA}
+  api-key: ${ybm-api-key:NA}
+  project-id: ${ybm-project-id:NA}
+  cluster-id: ${ybm-cluster-id:NA}
+  baseuri: ${ybm-baseuri:https://cloud.yugabyte.com/api/public/v1/accounts}
+  pulltopologyfromapi: ${pulltopologyfromapi:false}
