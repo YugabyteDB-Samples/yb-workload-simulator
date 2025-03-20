@@ -51,4 +51,9 @@ public class WorkloadConfig {
         return new MultiRegionWorkload();
     }
 
+    @Bean(name="CloudantWorkload")
+    public WorkloadSimulation cloudantWorkload(){
+        return new CloudantWorkload();
+    }
+
 }

@@ -1,5 +1,9 @@
 package com.yugabyte.simulation.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.Date;
@@ -172,5 +176,18 @@ public class LoadGeneratorUtils {
 			return null;
 		}
 		return values.get(ThreadLocalRandom.current().nextInt(values.size()));
+	}
+
+	public static Timestamp getTimestamp() {
+		return new Timestamp(System.currentTimeMillis());
+	}
+
+	public static String getJson() {
+		ObjectMapper mapper = new ObjectMapper();
+		ObjectNode node = mapper.createObjectNode();
+		node.put("key1", getText(5, 10));
+		node.put("key2", getInt(1, 100));
+		node.put("key3", getDouble(1.0, 100.0));
+		return node.toString();
 	}
 }
