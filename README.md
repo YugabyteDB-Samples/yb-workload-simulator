@@ -28,7 +28,7 @@ To run the application locally, do the following:
 1. To start the application against a running local cluster, use the following command:
 
     ```sh
-    java -jar ./yb-workload-sim-0.0.2.jar
+    java -jar ./yb-workload-sim-0.0.9.jar
     ```
 
     By default, the application connects to a local YugabyteDB cluster at 127.0.0.1.
@@ -144,3 +144,16 @@ It is very easy to bring in your Data Model and run simulations against it.
 ```sh
 -Dspring.workload=MyAwesomeWorkload
 ```
+
+## App UI
+After starting your app, you can access the UI:
+```
+http://<host>:8080
+```
+
+1. Start the simulations by bringing the popup from left side hamburger menu 
+<img width="875" height="664" alt="Screenshot 2025-08-21 at 12 39 42 AM" src="https://github.com/user-attachments/assets/d802bb02-ee6b-4ef4-9b0e-dbc4d3112542" />
+2. This is how your UI will look like after simulations start. You can run multiple simulations in parallel.
+<img width="1915" height="867" alt="Screenshot 2025-08-21 at 12 41 07 AM" src="https://github.com/user-attachments/assets/cd478b04-1510-4082-b6d5-2c39a4ccc786" />
+
+
