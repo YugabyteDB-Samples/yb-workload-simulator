@@ -153,6 +153,7 @@ http://<host>:8080
 
 1. Start the simulations by bringing the popup from left side hamburger menu 
 <img width="875" height="664" alt="Screenshot 2025-08-21 at 12 39 42 AM" src="https://github.com/user-attachments/assets/d802bb02-ee6b-4ef4-9b0e-dbc4d3112542" />
+
 2. This is how your UI will look like after simulations start. You can run multiple simulations in parallel.
 <img width="1915" height="867" alt="Screenshot 2025-08-21 at 12 41 07 AM" src="https://github.com/user-attachments/assets/cd478b04-1510-4082-b6d5-2c39a4ccc786" />
 
